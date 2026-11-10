@@ -212,6 +212,7 @@ export default function Accounts() {
         rows={rows}
         columns={cols}
         rowKey={(r) => r.a.id}
+        onRowClick={(r) => navigate(`/accounts/${r.a.id}`)}
         mobileTitle={(r) => <span className="font-semibold">{r.n}. {r.a.agencyName}</span>}
         search={(r) => `${r.a.agencyName} ${r.a.name} ${r.a.mobile} ${r.l.accountNo}`}
         exportName={`accounts-${view}`}

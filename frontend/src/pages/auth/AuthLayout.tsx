@@ -2,7 +2,7 @@ import { Bike, FileText, HandCoins, IndianRupee, Newspaper, PackageCheck, Repeat
 import * as React from 'react'
 import { useRichMotion } from '@/app/theme'
 import { Logo } from '@/app/Shell'
-import { ModeToggle, Newsprint, ThemeMenu } from '@/components/fx/Appearance'
+import { Newsprint, ThemeMenu } from '@/components/fx/Appearance'
 import { Paper3D } from '@/components/fx/Scene3D'
 import { useData } from '@/hooks/app'
 import { cn } from '@/lib/utils'
@@ -245,7 +245,6 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
               <Lane houses={MINI_HOUSES} className="absolute left-0 top-0 w-[150px] origin-top-left scale-[0.62]" />
             </div>
             <div className="flex items-center">
-              <ModeToggle />
               <ThemeMenu />
             </div>
           </div>
@@ -255,7 +254,6 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
         <div className="absolute right-5 top-5 z-10 hidden items-center gap-1 lg:flex">
-          <ModeToggle />
           <ThemeMenu />
         </div>
         {/* lg: top padding keeps a tall card clear of the light/dark and colour buttons in the corner. */}

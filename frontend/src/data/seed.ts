@@ -396,11 +396,8 @@ export function buildSeed(): DB {
     lastLoginAt: lastSeenHours[i] == null ? undefined : new Date(Date.now() - lastSeenHours[i]! * 3600e3).toISOString(),
     lastIp: lastSeenHours[i] == null ? undefined : i % 2 ? '2405:201:f00b:e801:1b2:ba6f:26bb:6fe2' : '2401:4900:8fdc:cc37:b045:c642:f8b4:ba70',
   }))
-  const accountRequests: AccountRequest[] = [
-    { id: 'req_1', accountNo: '006-1126/D', agencyName: 'Greenfield News Hub', ownerName: 'Anil Varghese', mobile: '9496011122', email: 'anil@greenfieldnews.in', location: 'India / Kerala / Kollam / Kollam', otp: '482915', createdAt: new Date(Date.now() - 3 * 3600e3).toISOString(), status: 'pending' },
-    { id: 'req_2', accountNo: '007-1126/D', agencyName: 'Coastal Papers', ownerName: 'Fathima Beevi', mobile: '9745098765', email: 'coastalpapers@gmail.com', location: 'India / Kerala / Kozhikode / Kozhikode', otp: '701356', createdAt: new Date(Date.now() - 26 * 3600e3).toISOString(), status: 'pending' },
-    { id: 'req_3', accountNo: '008-1026/D', agencyName: 'Quick Mart Agency', ownerName: 'Ravi Shankar', mobile: '9847700011', email: 'quickmart@mail.com', location: 'India / Tamil Nadu / Chennai / Chennai', otp: '115204', createdAt: new Date(Date.now() - 8 * 24 * 3600e3).toISOString(), status: 'rejected', decidedAt: new Date(Date.now() - 7 * 24 * 3600e3).toISOString() },
-  ]
+  // Agencies register straight into an account now (no manual approval), so there are no pending requests.
+  const accountRequests: AccountRequest[] = []
   const broadcasts: Broadcast[] = [
     { id: 'bcs_1', accountIds: agents.map((a) => a.id), startDate: addDaysISO(today, -4), expiryDate: addDaysISO(today, 10), message: 'Price revision: The Hindu moves to ₹13 per copy from next month. Please inform your subscribers.', kind: 'notification', createdAt: new Date(Date.now() - 4 * 24 * 3600e3).toISOString(), createdBy: ADMIN },
     { id: 'bcs_2', accountIds: [agents[3]!.id, agents[4]!.id], startDate: addDaysISO(today, -1), expiryDate: addDaysISO(today, 14), message: 'Your licence is due for renewal. Please renew to keep your account active.', kind: 'alert', createdAt: new Date(Date.now() - 24 * 3600e3).toISOString(), createdBy: ADMIN },

@@ -19,7 +19,7 @@ type Who = '' | 'customer' | 'agent' | 'executive'
 
 const TYPES: { id: Exclude<Who, ''>; icon: LucideIcon; title: string; text: string; tag: string }[] = [
   { id: 'customer', icon: UserRound, title: 'Customer / Subscriber', text: 'Papers and magazines at your door.', tag: 'Free · 2 minutes' },
-  { id: 'agent', icon: Store, title: 'Agency Owner', text: 'Routes, billing and collections.', tag: 'Verified by NewsRound' },
+  { id: 'agent', icon: Store, title: 'Agency Owner', text: 'Routes, billing and collections.', tag: 'Opens at once' },
   { id: 'executive', icon: Bike, title: 'Delivery Executive', text: 'Your login comes from your agency.', tag: 'Added by your agency' },
 ]
 
@@ -337,7 +337,7 @@ function Progress({ stage }: { stage: number }) {
   )
 }
 
-/** Agency sign-up: goes to the administrator's Account Verification list, no account exists until it is accepted. */
+/** Agency sign-up: the account is opened at once (no manual approval); the administrator only gets a notification. */
 function AgencyRegistration({ onBack }: { onBack: () => void }) {
   const form = useForm(
     { agencyName: '', ownerName: '', mobile: '', email: '', state: '', district: '', city: '' },
@@ -378,9 +378,9 @@ function AgencyRegistration({ onBack }: { onBack: () => void }) {
         <span className="animate-pop relative mx-auto mb-4 grid size-16 place-items-center rounded-2xl bg-success text-white shadow-[0_12px_28px_-12px_var(--glow)]">
           <CheckCircle2 className="size-8" />
         </span>
-        <h2 className="font-serif text-[26px] font-semibold text-primary">Request sent</h2>
+        <h2 className="font-serif text-[26px] font-semibold text-primary">Account created</h2>
         <p className="mt-2 text-[14.5px] text-muted-foreground">
-          Your registration number is <b className="font-mono text-foreground">{sent}</b>. The administrator will verify your agency and call you. After approval, sign in with +91 {v.mobile} and create your MPIN with an OTP.
+          Your account number is <b className="font-mono text-foreground">{sent}</b>. Your agency is ready: sign in with +91 {v.mobile} and create your MPIN with an OTP.
         </p>
         <Button size="lg" className="mt-6 w-full" asChild>
           <Link to="/login">
@@ -395,7 +395,7 @@ function AgencyRegistration({ onBack }: { onBack: () => void }) {
       <TypeBar icon={Store} label="Agency sign-up" onChange={onBack} />
       <div className="mb-4 [@media(max-height:760px)]:mb-3">
         <h2 className="font-serif text-[26px] font-semibold leading-tight text-primary [@media(max-height:760px)]:text-[22px]">Register your agency</h2>
-        <p className="mt-1 text-[14px] text-muted-foreground">The NewsRound administrator verifies your details, then opens your account.</p>
+        <p className="mt-1 text-[14px] text-muted-foreground">Your account opens at once. Sign in with this mobile number and create your MPIN.</p>
       </div>
       <div className="slim grid grid-cols-2 content-start gap-x-3 gap-y-3">
         <Field label="Agency name" required htmlFor="agencyName" error={errors.agencyName} className="col-span-2">
@@ -428,7 +428,7 @@ function AgencyRegistration({ onBack }: { onBack: () => void }) {
           <ArrowLeft /> Back
         </Button>
         <Button type="submit" size="lg" className="flex-1" loading={busy}>
-          Send for verification <ArrowRight />
+          Create agency account <ArrowRight />
         </Button>
       </div>
     </form>

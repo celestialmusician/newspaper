@@ -1,22 +1,11 @@
 import { Check, Monitor, Moon, Palette as PaletteIcon, Sun } from 'lucide-react'
 import * as React from 'react'
-import { PALETTES, setTheme, toggleDark, useTheme, type Mode } from '@/app/theme'
+import { PALETTES, setTheme, useTheme, type Mode } from '@/app/theme'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/overlay'
 import { cn } from '@/lib/utils'
 
 const at = (e: React.MouseEvent) => ({ x: e.clientX, y: e.clientY })
-
-/** Animated sun/moon toggle. */
-export function ModeToggle({ className }: { className?: string }) {
-  const dark = useTheme((s) => s.dark)
-  return (
-    <Button variant="ghost" size="icon" className={cn('soft-raised relative overflow-hidden rounded-full', className)} aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'} onClick={(e) => toggleDark(at(e))}>
-      <Sun className={cn('absolute size-5 transition-all duration-500', dark ? 'rotate-90 scale-0 opacity-0' : 'rotate-0 scale-100 opacity-100')} />
-      <Moon className={cn('absolute size-5 transition-all duration-500', dark ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0')} />
-    </Button>
-  )
-}
 
 const MODES: { id: Mode; label: string; icon: React.ElementType }[] = [
   { id: 'light', label: 'Light', icon: Sun },

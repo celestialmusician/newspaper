@@ -17,7 +17,7 @@ import {
 } from 'lucide-react'
 import * as React from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { IdleCourier, ModeToggle, Newsprint, ThemeMenu, WelcomeVeil } from '@/components/fx/Appearance'
+import { IdleCourier, Newsprint, ThemeMenu, WelcomeVeil } from '@/components/fx/Appearance'
 import { Button } from '@/components/ui/button'
 import { Avatar, TONE_INK } from '@/components/ui/misc'
 import {
@@ -76,7 +76,6 @@ function useBadges() {
     notifications: notes.filter((n) => !n.read).length,
     complaints: actor.role === 'customer' ? 0 : db.complaints.filter((c) => c.status !== 'resolved' && (actor.role === 'admin' || db.customers.find((x) => x.id === c.customerId)?.agentId === actor.userId)).length,
     queue: queue.length,
-    verification: actor.role === 'admin' ? db.accountRequests.filter((r) => r.status === 'pending').length : 0,
   }
 }
 
@@ -280,8 +279,10 @@ function NotificationBell() {
   const notes = useMyNotifications()
   const unread = notes.filter((n) => !n.read)
   const navigate = useNavigate()
+  // The panel closes when a notification (or the centre link) is tapped, so the page it opens is not left behind it.
+  const [open, setOpen] = React.useState(false)
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="icon" className="soft-raised relative rounded-full" aria-label={`Notifications (${unread.length} unread)`}>
           <Bell className={cn('size-5', unread.length > 0 && 'idle-ring')} />
@@ -304,6 +305,7 @@ function NotificationBell() {
                 className={cn('flex w-full gap-3 px-4 py-3 text-left hover:bg-accent/60', !n.read && 'bg-masthead/[0.04]')}
                 onClick={() => {
                   void notifApi.markRead([n.id])
+                  setOpen(false)
                   if (n.link) navigate(n.link)
                 }}
               >
@@ -320,7 +322,9 @@ function NotificationBell() {
         </ul>
         <div className="border-t border-border p-2">
           <Button variant="ghost" className="w-full" asChild>
-            <Link to="/notifications">Open notification centre</Link>
+            <Link to="/notifications" onClick={() => setOpen(false)}>
+              Open notification centre
+            </Link>
           </Button>
         </div>
       </PopoverContent>
@@ -712,10 +716,8 @@ export function Shell() {
             </div>
           )}
           <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
-            <ModeToggle />
-            <span className="hidden sm:contents">
-              <ThemeMenu />
-            </span>
+            {/* Light / dark / auto and the colour theme live in this one Appearance panel, on every screen size. */}
+            <ThemeMenu />
             <NotificationBell />
             <UserMenu />
           </div>

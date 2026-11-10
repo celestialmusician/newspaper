@@ -186,7 +186,7 @@ export function TruncatePanel({ agentId, onClose }: { agentId: ID | null; onClos
 }
 
 /** Account Details: read at a glance, with an Edit button that turns the details into fields. */
-function AccountDetails({ agentId }: { agentId: ID }) {
+export function AccountDetails({ agentId }: { agentId: ID }) {
   const db = useData()
   const { run, pending } = useRun()
   const agent = db.agents.find((a) => a.id === agentId)!

@@ -22,7 +22,7 @@ export default function AdminDashboard() {
     })
     const count = (v: AccountView) => lic.filter(({ l, a }) => inAccountView(v, l, a, t)).length
     return {
-      registrations: db.accountRequests.filter((r) => r.status === 'pending').length,
+      registrations: count('new'),
       active: count('active'),
       deactive: count('deactive'),
       expiry: count('expiry'),
@@ -46,7 +46,7 @@ export default function AdminDashboard() {
         description="New registrations, agency accounts, licence expiry and who is online."
       />
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
-        <StatCard index={0} label="No of new registrations" value={m.registrations} hint="Waiting for approval" icon={UserPlus} tone="warning" onClick={() => navigate('/verification?view=pending')} />
+        <StatCard index={0} label="No of new registrations" value={m.registrations} hint="Joined in the last 7 days" icon={UserPlus} tone="warning" onClick={() => navigate('/accounts?view=new')} />
         <StatCard index={1} label="No of active accounts" value={m.active} hint="Can sign in today" icon={BadgeCheck} tone="success" onClick={() => navigate('/accounts?view=active')} />
         <StatCard index={2} label="No of deactive accounts" value={m.deactive} hint="Locked or switched off" icon={Lock} tone="danger" onClick={() => navigate('/accounts?view=deactive')} />
         <StatCard index={3} label="No of accounts expiry" value={m.expiry} hint="Ends within 30 days" icon={CalendarClock} tone="accent" onClick={() => navigate('/accounts?view=expiry')} />

@@ -16,7 +16,6 @@ import { descendantIds } from '@/domain/locations'
 import { discountPctOf, resolvePrice, validateAgentOverride, validatePriceTriple } from '@/domain/pricing'
 import { deliveryKey, deriveSubscriptionStatus, matchesFrequency, qtyOn } from '@/domain/schedule'
 import type {
-  AccountRequest,
   Agent,
   AppNotification,
   Broadcast,
@@ -369,6 +368,11 @@ function startSession(role: Role, userId: ID, mobile: string) {
     const c = d.credentials[`${role}:${mobile}`]
     if (c) c.lastLoginAt = nowISO()
     const lic = role === 'agent' ? d.licences.find((l) => l.agentId === userId) : undefined
+    if (lic && !lic.lastLoginAt) {
+      // First time this agency signs in: tell the administrator.
+      const ag = d.agents.find((x) => x.id === userId)
+      if (ag) notify(d, 'role:admin', 'registration', 'New agency signed in', `${ag.agencyName} (${ag.name}) signed in for the first time.`, `/accounts/${ag.id}`)
+    }
     if (lic) lic.lastLoginAt = nowISO()
   })
   const s = { role, userId, token: uid('jwt'), issuedAt: nowISO() }
@@ -1650,7 +1654,11 @@ export const masters = {
 }
 
 export const accountRequests = {
-  /** Public sign-up form for a new distribution agency: waits on the administrator's Account Verification list. */
+  /**
+   * Public sign-up of a new distribution agency. There is no manual approval: the account and its
+   * licence are opened at once (the primary plan, one year, three users), the agency signs in with
+   * its mobile number and an OTP, and the administrator is only told, with a link to the profile.
+   */
   async submit(input: { agencyName: string; ownerName: string; mobile: string; email: string; location: string }) {
     await latency()
     if (API_MODE === 'http') throw new ApiError('Agency registration is not available on the live server yet. Please contact NewsRound support.')
@@ -1661,70 +1669,36 @@ export const accountRequests = {
     if (!isIndianMobile(input.mobile)) throw new ApiError('Enter a valid 10-digit Indian mobile number.')
     return commit((d) => {
       if (d.agents.some((x) => x.mobile === input.mobile)) throw new ApiError('An agency account already exists for this mobile number. Please sign in.')
-      if (d.accountRequests.some((x) => x.mobile === input.mobile && x.status === 'pending')) throw new ApiError('A registration for this mobile number is already waiting for approval.')
-      const seq = d.accountRequests.reduce((m, x) => Math.max(m, parseInt(x.accountNo, 10) || 0), 0) + 1
-      const now = new Date()
-      const r: AccountRequest = {
-        id: uid('req'),
-        accountNo: `${String(seq).padStart(3, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getFullYear()).slice(2)}/D`,
-        agencyName,
-        ownerName,
-        mobile: input.mobile,
-        email: input.email.trim(),
-        location: input.location,
-        otp: String(100000 + Math.floor(Math.random() * 900000)),
-        createdAt: nowISO(),
-        status: 'pending',
+      // "India / State / District / City": give the agency the areas of its city (else its district, else every
+      // area), so it can start at once. An area sits under locality > city > district > state.
+      const [, , district = '', city = ''] = input.location.split('/').map((x) => x.trim().toLowerCase())
+      const areas = d.locations.filter((l) => l.level === 'area')
+      const within = (n: LocationNode, level: string, name: string) => {
+        for (let p = n.parentId ? d.locations.find((x) => x.id === n.parentId) : undefined; p; p = p.parentId ? d.locations.find((x) => x.id === p!.parentId) : undefined) if (p.level === level && p.name.toLowerCase() === name) return true
+        return false
       }
-      d.accountRequests.push(r)
-      notify(d, 'role:admin', 'registration', 'New agency registration', `${agencyName} (${ownerName}) is waiting for verification.`, '/verification')
-      d.logs.unshift({ id: uid('log'), at: nowISO(), actorId: r.id, actorRole: 'agent', action: 'licence.request', entity: agencyName, entityId: r.id })
-      return { accountNo: r.accountNo }
-    })
-  },
-  /** Approve a new agency: creates the agent account and its licence in one step. */
-  async accept(id: ID, input: { areaIds: ID[]; planId: ID | null; licenceEnd: ISODate; userLimit: number }) {
-    const a = guard('licence.manage')
-    await latency()
-    if (!input.areaIds.length) throw new ApiError('Assign at least one service area.')
-    if (input.licenceEnd <= todayISO()) throw new ApiError('Licence end date must be in the future.')
-    if (!(input.userLimit >= 1)) throw new ApiError('Allow at least one user.')
-    return commit((d) => {
-      const r = req(d.accountRequests.find((x) => x.id === id), 'Request not found')
-      if (r.status !== 'pending') throw new ApiError('This request has already been decided.')
-      assertUniqueMobile(d, 'agent', r.mobile)
+      const inCity = city ? areas.filter((l) => within(l, 'city', city)) : []
+      const inDistrict = district ? areas.filter((l) => within(l, 'district', district)) : []
+      const chosen = inCity.length ? inCity : inDistrict.length ? inDistrict : areas
       const ag: Agent = {
         id: uid('agt'),
         code: nextCode(d, 'agent', 'AG-'),
-        name: r.ownerName,
-        mobile: r.mobile,
-        email: r.email,
-        agencyName: r.agencyName,
-        areaIds: input.areaIds,
+        name: ownerName,
+        mobile: input.mobile,
+        email: input.email.trim(),
+        agencyName,
+        areaIds: chosen.map((l) => l.id),
         maxDiscountPct: d.settings.defaultAgentMaxDiscountPct,
         canManageRoutes: true,
         joiningDate: todayISO(),
         status: 'active',
       }
       d.agents.push(ag)
-      d.licences.push(newLicence(d, ag, { planId: input.planId, licenceEnd: input.licenceEnd, userLimit: input.userLimit, accountNo: r.accountNo }))
-      r.status = 'accepted'
-      r.decidedAt = nowISO()
-      r.agentId = ag.id
-      log(d, a, 'licence.verify', r.agencyName, `Account accepted · valid till ${input.licenceEnd}`, ag.id)
-      notify(d, 'role:admin', 'registration', 'Agency verified', `${r.agencyName} is now an active account (${ag.code}).`, '/accounts')
-      return ag
-    })
-  },
-  async reject(id: ID) {
-    const a = guard('licence.manage')
-    await latency()
-    commit((d) => {
-      const r = req(d.accountRequests.find((x) => x.id === id), 'Request not found')
-      if (r.status !== 'pending') throw new ApiError('This request has already been decided.')
-      r.status = 'rejected'
-      r.decidedAt = nowISO()
-      log(d, a, 'licence.reject', r.agencyName, 'Registration rejected', id)
+      const lic = newLicence(d, ag)
+      d.licences.push(lic)
+      d.logs.unshift({ id: uid('log'), at: nowISO(), actorId: ag.id, actorRole: 'agent', action: 'licence.register', entity: agencyName, detail: `Self-registered · ${lic.accountNo} · ${input.location}`, entityId: ag.id })
+      notify(d, 'role:admin', 'registration', 'New agency registered', `${agencyName} (${ownerName}) registered and can sign in now.`, `/accounts/${ag.id}`)
+      return { accountNo: lic.accountNo }
     })
   },
 }
@@ -1745,7 +1719,6 @@ export const licences = {
     if (!(input.userLimit >= 1)) throw new ApiError('Allow at least one user.')
     return commit((d) => {
       assertUniqueMobile(d, 'agent', input.mobile)
-      if (d.accountRequests.some((x) => x.mobile === input.mobile && x.status === 'pending')) throw new ApiError('A registration for this mobile number is waiting in Account Verification. Accept it there instead.')
       const ag: Agent = {
         id: uid('agt'),
         code: nextCode(d, 'agent', 'AG-'),

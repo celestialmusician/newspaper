@@ -57,7 +57,7 @@ export interface NavItem {
   roles: Role[]
   /** Role-specific label override. */
   labels?: Partial<Record<Role, string>>
-  badge?: 'notifications' | 'complaints' | 'queue' | 'verification'
+  badge?: 'notifications' | 'complaints' | 'queue'
   /** Expandable sub-menu (Agent Console). */
   children?: NavChild[]
 }
@@ -152,7 +152,6 @@ const ADMIN_NAV: NavGroup[] = [
     title: '',
     items: [
       { to: '/', label: 'Dashboard', icon: LayoutDashboard, roles: ['admin'] },
-      { to: '/verification', label: 'Account Verification', icon: ShieldCheck, roles: ['admin'], badge: 'verification' },
       { to: '/accounts', label: 'Active Accounts', icon: BadgeCheck, roles: ['admin'] },
       {
         to: '/agent-console',
@@ -254,7 +253,7 @@ const AGENT_NAV: NavGroup[] = [
 
 /** Dashboard shortcuts: the most-used screens of each panel, taken from its own menu. */
 const QUICK: Partial<Record<Role, string[]>> = {
-  admin: ['/verification', '/accounts', '/manage-products', '/product-rates', '/broadcasts', '/resellers', '/control-room', '/licence-plans'],
+  admin: ['/accounts', '/manage-products', '/product-rates', '/broadcasts', '/resellers', '/control-room', '/licence-plans'],
   agent: ['/customers-master', '/manage-subscriptions', '/payment-collection', '/bill', '/delivery-slip', '/manage-route', '/delivery-boys', '/reports/sales'],
   executive: ['/deliveries/today', '/routes', '/collections', '/stock', '/customers', '/invoices', '/calendar', '/deliveries'],
   customer: ['/subscriptions', '/calendar', '/invoices', '/payments', '/deliveries', '/complaints', '/notifications', '/profile'],
@@ -267,7 +266,8 @@ export const quickLinks = (role: Role): { to: string; label: string; icon: Lucid
 
 /** Header-menu pages (account menu, notification bell) each console can also open. */
 const EXTRA: Partial<Record<Role, string[]>> = {
-  admin: ['/notifications', '/profile'],
+  // '/verification' is the retired approval list: it only redirects to the New accounts tab (old links and notifications).
+  admin: ['/notifications', '/profile', '/verification'],
   agent: ['/help', '/notifications', '/invoices', '/profile'],
 }
 
@@ -320,8 +320,8 @@ export const moreSections = (role: Role, exclude: string[], allow?: (path: strin
 export const BOTTOM_NAV: Record<Role, { to: string; label: string; icon: LucideIcon }[]> = {
   admin: [
     { to: '/', label: 'Dashboard', icon: LayoutDashboard },
-    { to: '/verification', label: 'Verify', icon: ShieldCheck },
     { to: '/accounts', label: 'Accounts', icon: BadgeCheck },
+    { to: '/control-room', label: 'Online', icon: MonitorSmartphone },
     { to: '/broadcasts', label: 'Send', icon: Megaphone },
   ],
   agent: [
