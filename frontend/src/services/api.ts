@@ -354,6 +354,41 @@ export const auth = {
     })
   },
 
+  /** My profile: the signed-in administrator, agent or delivery boy corrects their own name, mobile and email. */
+  async updateProfile(patch: { name: string; mobile: string; email: string }) {
+    const s = actor()
+    if (s.role === 'customer') throw new ApiError('Use Edit my details to change a subscriber profile.', 'forbidden')
+    if (s.staffId) throw new ApiError('Staff users cannot change the owner profile.', 'forbidden')
+    if (API_MODE === 'http') throw new ApiError('Profile editing is not available on the live server yet.')
+    await latency()
+    const db = getDB()
+    const name = patch.name.trim()
+    const email = patch.email.trim()
+    if (!name) throw new ApiError('Enter your name.')
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new ApiError('Enter a valid email address.')
+    assertUniqueMobile(db, s.role, patch.mobile, s.userId)
+    commit((d) => {
+      const list: { id: ID; name: string; mobile: string; email?: string }[] = s.role === 'admin' ? d.admins : s.role === 'agent' ? d.agents : d.executives
+      const me = req(list.find((x) => x.id === s.userId), 'Account not found')
+      if (s.role === 'executive' && d.executives.find((x) => x.id === me.id)?.altMobile === patch.mobile) throw new ApiError('The mobile number must differ from the alternate number.')
+      const changed: string[] = []
+      if (me.name !== name) changed.push('name')
+      if ((me.email ?? '') !== email) changed.push('email')
+      if (me.mobile !== patch.mobile) {
+        changed.push('mobile')
+        // Sign-in is keyed by mobile: carry the MPIN over to the new number.
+        const old = d.credentials[`${s.role}:${me.mobile}`]
+        if (old) {
+          delete d.credentials[`${s.role}:${me.mobile}`]
+          d.credentials[`${s.role}:${patch.mobile}`] = { ...old, key: `${s.role}:${patch.mobile}` }
+        }
+      }
+      if (!changed.length) return
+      Object.assign(me, { name, mobile: patch.mobile, email: email || (s.role === 'executive' ? undefined : '') })
+      log(d, s, 'profile.update', name, `Changed ${changed.join(', ')}`, me.id)
+    })
+  },
+
   logout() {
     setSession(null)
   },
@@ -612,6 +647,15 @@ async function passwordCredential(role: Role, userId: ID, password: string): Pro
 }
 export type CustomerInput = Omit<Customer, 'id' | 'code' | 'agentId' | 'routeId' | 'status' | 'registeredOn'> & { agentId?: ID; routeId?: ID | null; code?: string; registeredOn?: ISODate }
 
+/** Sign-in is keyed by mobile: when someone's number changes, their MPIN moves to the new number. */
+function moveCredential(d: DB, role: Role, from: string, to: string) {
+  if (from === to) return
+  const old = d.credentials[`${role}:${from}`]
+  if (!old) return
+  delete d.credentials[`${role}:${from}`]
+  d.credentials[`${role}:${to}`] = { ...old, key: `${role}:${to}` }
+}
+
 function assertUniqueMobile(db: DB, role: Role, mobile: string, selfId?: ID) {
   if (!isIndianMobile(mobile)) throw new ApiError('Enter a valid 10-digit Indian mobile number.')
   const list: { id: ID; mobile: string }[] = role === 'agent' ? db.agents : role === 'executive' ? db.executives : role === 'customer' ? db.customers : db.admins
@@ -645,6 +689,7 @@ export const agents = {
     if (patch.mobile) assertUniqueMobile(getDB(), 'agent', patch.mobile, id)
     return commit((d) => {
       const ag = req(d.agents.find((x) => x.id === id), 'Agent not found')
+      if (patch.mobile) moveCredential(d, 'agent', ag.mobile, patch.mobile)
       Object.assign(ag, patch)
       log(d, a, patch.status ? `agent.${patch.status}` : 'agent.update', ag.name, undefined, id)
       return ag
@@ -719,6 +764,7 @@ export const executives = {
       patch = rest
       if ('altMobile' in patch || 'altMobileRelation' in patch || patch.mobile) assertAltContact(patch.mobile ?? ex.mobile, patch.altMobile ?? ex.altMobile, patch.altMobileRelation ?? ex.altMobileRelation)
       if (patch.status === 'inactive' && d.routes.some((r) => r.executiveId === id)) throw new ApiError('Hand over this executive\'s routes before deactivating the account.')
+      if (patch.mobile) moveCredential(d, 'executive', ex.mobile, patch.mobile)
       Object.assign(ex, patch)
       log(d, a, patch.status ? `executive.${patch.status}` : 'executive.update', ex.name, undefined, id)
       return ex
@@ -792,6 +838,7 @@ export const customers = {
     return commit((d) => {
       const c = req(d.customers.find((x) => x.id === id), 'Customer not found')
       const { routeId, ...rest } = patch
+      if (rest.mobile) moveCredential(d, 'customer', c.mobile, rest.mobile)
       Object.assign(c, rest)
       if (routeId !== undefined && routeId !== c.routeId) moveCustomerToRoute(d, c, routeId)
       log(d, a, patch.status ? `customer.${patch.status}` : 'customer.update', c.name, undefined, id)

@@ -6,13 +6,14 @@ import { AppearancePanel } from '@/components/fx/Appearance'
 import { PinInput } from '@/components/PinInput'
 import { Button } from '@/components/ui/button'
 import { Avatar, Badge, Card, CardBody, CardHeader, DemoNote, KeyValue, PageHeader } from '@/components/ui/misc'
+import { Field, Input } from '@/components/ui/form'
 import { Dialog, DialogContent, DialogFooter } from '@/components/ui/overlay'
 import { userName } from '@/domain/access'
 import { fullAddressLine } from '@/domain/locations'
 import { ROLE_LABEL } from '@/domain/types'
-import { errorMessage, useActor, useData } from '@/hooks/app'
+import { errorMessage, useActor, useData, useRun } from '@/hooks/app'
 import { fmtDate, fmtDateTime } from '@/lib/dates'
-import { formatMobile } from '@/lib/utils'
+import { formatMobile, isIndianMobile } from '@/lib/utils'
 import { auth } from '@/services/api'
 import { toast } from 'sonner'
 
@@ -26,6 +27,8 @@ export default function Profile() {
   const user = actor.role === 'admin' ? (db.admins.find((a) => a.id === actor.userId) ?? db.admins[0]!) : actor.role === 'agent' ? db.agents.find((a) => a.id === actor.userId)! : actor.role === 'executive' ? db.executives.find((e) => e.id === actor.userId)! : db.customers.find((c) => c.id === actor.userId)!
   const cred = db.credentials[`${actor.role}:${user.mobile}`]
   const customer = actor.role === 'customer' ? db.customers.find((c) => c.id === actor.userId) : undefined
+  // Administrator, agency owner and delivery boy edit their own profile; staff users work under the owner's profile.
+  const canEditSelf = actor.role !== 'customer' && !actor.staffId
   const executive = actor.role === 'executive' ? db.executives.find((e) => e.id === actor.userId) : undefined
   React.useEffect(() => {
     if (window.location.hash === '#appearance') document.getElementById('appearance')?.scrollIntoView({ behavior: 'smooth' })
@@ -43,9 +46,9 @@ export default function Profile() {
           </Badge>
           <div className="mt-2 text-[14px] text-muted-foreground">{formatMobile(user.mobile)}</div>
           <div className="mt-5 flex flex-col gap-2">
-            {customer && (
+            {(customer || canEditSelf) && (
               <Button variant="outline" onClick={() => setEdit(true)}>
-                <Pencil /> Edit my details
+                <Pencil /> {customer ? 'Edit my details' : 'Edit profile'}
               </Button>
             )}
             <Button variant="outline" onClick={() => setPin(true)}>
@@ -94,7 +97,7 @@ export default function Profile() {
                 ]}
               />
             )}
-            {!customer && <DemoNote className="mt-4">Staff profile details are managed by the Super Administrator.</DemoNote>}
+            {!customer && !canEditSelf && <DemoNote className="mt-4">Staff user details are managed by the agency owner.</DemoNote>}
           </CardBody>
         </Card>
         <Card id="appearance" className="scroll-mt-24 lg:col-start-2">
@@ -105,6 +108,7 @@ export default function Profile() {
         </Card>
       </div>
       {customer && <CustomerDialog open={edit} onOpenChange={setEdit} customer={customer} />}
+      {edit && canEditSelf && <EditProfile onClose={() => setEdit(false)} name={name} mobile={user.mobile} email={'email' in user ? (user.email ?? '') : ''} />}
       {pin && <ChangeMpin onClose={() => setPin(false)} mobile={user.mobile} />}
     </>
   )
@@ -153,6 +157,54 @@ function ChangeMpin({ onClose, mobile }: { onClose: () => void; mobile: string }
             Cancel
           </Button>
         </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+function EditProfile({ onClose, name, mobile, email }: { onClose: () => void; name: string; mobile: string; email: string }) {
+  const { run, pending } = useRun()
+  const [v, setV] = React.useState({ name, mobile, email })
+  const [touched, setTouched] = React.useState(false)
+  const errors = {
+    name: v.name.trim() ? '' : 'Enter your name.',
+    mobile: isIndianMobile(v.mobile) ? '' : 'Enter a valid 10-digit mobile number.',
+    email: !v.email.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email.trim()) ? '' : 'Enter a valid email address.',
+  }
+  const dirty = v.name.trim() !== name || v.mobile !== mobile || v.email.trim() !== email
+  const save = async () => {
+    setTouched(true)
+    if (errors.name || errors.mobile || errors.email) return
+    if (await run(() => auth.updateProfile(v), 'Profile saved')) onClose()
+  }
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent size="sm" title="Edit profile" description="Your name, mobile number and email.">
+        <form
+          className="grid gap-3"
+          onSubmit={(e) => {
+            e.preventDefault()
+            void save()
+          }}
+        >
+          <Field label="Name" required error={touched ? errors.name : undefined}>
+            <Input value={v.name} onChange={(e) => setV({ ...v, name: e.target.value })} autoFocus autoComplete="name" />
+          </Field>
+          <Field label="Mobile" required error={touched ? errors.mobile : undefined} hint={v.mobile !== mobile ? 'You sign in with the new number. Your MPIN stays the same.' : undefined}>
+            <Input value={v.mobile} inputMode="numeric" autoComplete="tel-national" onChange={(e) => setV({ ...v, mobile: e.target.value.replace(/\D/g, '').slice(0, 10) })} />
+          </Field>
+          <Field label="Email" error={touched ? errors.email : undefined}>
+            <Input value={v.email} type="email" autoComplete="email" onChange={(e) => setV({ ...v, email: e.target.value })} />
+          </Field>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={pending || !dirty}>
+              Save changes
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   )

@@ -1,18 +1,26 @@
-import { ArrowLeft, Building2, Lock, LogIn, MapPin, Route as RouteIcon, Truck, Unlock, Users } from 'lucide-react'
+import { ArrowLeft, Building2, Lock, LogIn, MapPin, Pencil, Route as RouteIcon, Search, Truck, Unlock, Users } from 'lucide-react'
+import * as React from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { CustomerDialog } from '@/components/CustomerDialog'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/form'
 import { Avatar, Badge, Card, CardBody, CardHeader, EmptyState, StatCard } from '@/components/ui/misc'
 import { useConfirm } from '@/components/ui/overlay'
 import { useData, useRun } from '@/hooks/app'
 import { diffDays, fmtDateTime, todayISO } from '@/lib/dates'
 import { formatMobile } from '@/lib/utils'
 import { licences as api } from '@/services/api'
+import { AgentDialog } from '../people/Agents'
+import { ExecutiveDialog } from '../people/Executives'
 import { AccountDetails } from './TruncatePanel'
+
+const SHOWN = 8
 
 /**
  * Agency profile for the Super Administrator. A notification ("New agency registered", "signed in
  * for the first time") opens it. Shows who the agency is, how it is doing and its account details
- * (editable), with the two actions the administrator uses most: lock and root login.
+ * (editable), with the two actions the administrator uses most: lock and root login. The owner,
+ * the delivery boys and the customers of the agency can all be edited from here.
  */
 export default function AccountProfile() {
   const { id } = useParams()
@@ -20,6 +28,11 @@ export default function AccountProfile() {
   const navigate = useNavigate()
   const confirm = useConfirm()
   const { run } = useRun()
+  const [owner, setOwner] = React.useState(false)
+  const [boy, setBoy] = React.useState<string | null>(null)
+  const [cust, setCust] = React.useState<string | null>(null)
+  const [q, setQ] = React.useState('')
+  const [all, setAll] = React.useState(false)
   const a = db.agents.find((x) => x.id === id)
   const l = db.licences.find((x) => x.agentId === id)
   if (!a || !l) return <EmptyState icon={Building2} title="Account not found" description="It may have been deleted." action={<Button onClick={() => navigate('/accounts')}>Back to accounts</Button>} />
@@ -28,6 +41,11 @@ export default function AccountProfile() {
   const left = diffDays(l.licenceEnd, today)
   const isNew = diffDays(today, l.registeredOn) <= 7
   const users = 1 + db.executives.filter((e) => e.agentId === a.id).length
+  const boys = db.executives.filter((e) => e.agentId === a.id)
+  const mine = db.customers.filter((c) => c.agentId === a.id)
+  const needle = q.trim().toLowerCase()
+  const found = needle ? mine.filter((c) => `${c.name} ${c.code} ${c.mobile}`.toLowerCase().includes(needle)) : mine
+  const customers = all || needle ? found : found.slice(0, SHOWN)
   const areas = a.areaIds.map((x) => db.locations.find((n) => n.id === x)?.name).filter(Boolean) as string[]
 
   const toggleLock = async () => {
@@ -62,6 +80,9 @@ export default function AccountProfile() {
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={() => setOwner(true)}>
+            <Pencil /> Edit owner
+          </Button>
           <Button variant="outline" className="border-warning/40 text-warning hover:text-warning" onClick={() => void toggleLock()}>
             {l.locked ? <Unlock /> : <Lock />} {l.locked ? 'Unlock' : 'Lock'}
           </Button>
@@ -81,6 +102,60 @@ export default function AccountProfile() {
       <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <AccountDetails key={a.id} agentId={a.id} />
         <div className="grid gap-4">
+          <Card>
+            <CardHeader title="Delivery boys" icon={Truck} description={`${boys.length} on the team`} />
+            <CardBody className="grid gap-1.5">
+              {boys.length ? (
+                boys.map((e) => (
+                  <div key={e.id} className="flex items-center gap-2 rounded-lg border border-border px-3 py-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-[14px] font-semibold">{e.name}</div>
+                      <div className="truncate text-[12.5px] text-muted-foreground">
+                        {e.code} · {formatMobile(e.mobile)}
+                        {e.status !== 'active' ? ` · ${e.status}` : ''}
+                      </div>
+                    </div>
+                    <Button size="sm" variant="outline" onClick={() => setBoy(e.id)} aria-label={`Edit ${e.name}`}>
+                      <Pencil /> Edit
+                    </Button>
+                  </div>
+                ))
+              ) : (
+                <p className="text-[13.5px] text-muted-foreground">No delivery boys yet.</p>
+              )}
+            </CardBody>
+          </Card>
+          <Card>
+            <CardHeader title="Customers" icon={Users} description={`${mine.length} subscribers`} />
+            <CardBody className="grid gap-2">
+              {mine.length > SHOWN && (
+                <div className="relative">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, ID or mobile" className="pl-9" aria-label="Search customers" />
+                </div>
+              )}
+              {customers.map((c) => (
+                <div key={c.id} className="flex items-center gap-2 rounded-lg border border-border px-3 py-2">
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-[14px] font-semibold">{c.name}</div>
+                    <div className="truncate text-[12.5px] text-muted-foreground">
+                      {c.code} · {formatMobile(c.mobile)}
+                      {c.status !== 'active' ? ` · ${c.status}` : ''}
+                    </div>
+                  </div>
+                  <Button size="sm" variant="outline" onClick={() => setCust(c.id)} aria-label={`Edit ${c.name}`}>
+                    <Pencil /> Edit
+                  </Button>
+                </div>
+              ))}
+              {!customers.length && <p className="text-[13.5px] text-muted-foreground">{mine.length ? 'No customer matches.' : 'No customers yet.'}</p>}
+              {!needle && !all && found.length > SHOWN && (
+                <Button variant="ghost" size="sm" onClick={() => setAll(true)}>
+                  Show all {found.length}
+                </Button>
+              )}
+            </CardBody>
+          </Card>
           <Card>
             <CardHeader title="Sign-in" description="When this agency last used NewsRound." />
             <CardBody className="grid gap-2 text-[14px]">
@@ -120,6 +195,9 @@ export default function AccountProfile() {
           </Card>
         </div>
       </div>
+      {owner && <AgentDialog agent={a} onClose={() => setOwner(false)} />}
+      {boy && <ExecutiveDialog ex={db.executives.find((e) => e.id === boy)} onClose={() => setBoy(null)} />}
+      <CustomerDialog open={!!cust} onOpenChange={(o) => !o && setCust(null)} customer={db.customers.find((c) => c.id === cust)} />
     </>
   )
 }
