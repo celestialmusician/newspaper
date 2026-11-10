@@ -338,6 +338,7 @@ function UserMenu() {
   const staff = staffOf(db, actor)
   const name = staff?.name ?? userName(db, actor.userId)
   const roleLabel = staff ? 'Staff user' : ROLE_LABEL[actor.role]
+  const lastSeen = actor.role === 'agent' ? db.licences.find((l) => l.agentId === actor.userId) : undefined
   const navigate = useNavigate()
   const install = useInstall()
   return (
@@ -353,6 +354,12 @@ function UserMenu() {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-60">
         <DropdownMenuLabel>{roleLabel}</DropdownMenuLabel>
+        {lastSeen?.lastLoginAt && (
+          <div className="-mt-1 px-2.5 pb-2 text-[11.5px] leading-snug text-muted-foreground">
+            Last login {fmtDateTime(lastSeen.lastLoginAt)}
+            {lastSeen.lastIp ? ` · IP ${lastSeen.lastIp}` : ''}
+          </div>
+        )}
         {/* The profile page is the owner's own (mobile, MPIN), so staff users do not get it. */}
         {!staff && (
           <DropdownMenuItem onSelect={() => navigate('/profile')}>
@@ -635,6 +642,20 @@ export function Shell() {
   const topMenu = actor.role === 'admin' || actor.role === 'agent'
   const welcome = actor.role === 'agent' ? db.agents.find((a) => a.id === actor.userId)?.agencyName ?? db.settings.agencyName : ROLE_LABEL[actor.role]
   const lastLogin = actor.role === 'agent' ? db.licences.find((l) => l.agentId === actor.userId) : undefined
+  // Menu bar layout: with few entries (agency) the logo, menu and tools share one row from 1100px; with many
+  // (administrator) from 1640px. Narrower screens keep the menu on its own row under the header.
+  const menuSize = navFor(actor.role, canOpen).flatMap((g) => g.items).length > 6 ? 'many' : 'few'
+  const topRef = React.useRef<HTMLDivElement>(null)
+  // Pages with sticky parts (the report filter panel) sit just under the top bar, whatever height it has.
+  React.useEffect(() => {
+    const el = topRef.current
+    if (!el) return
+    const set = () => document.documentElement.style.setProperty('--shell-top-h', `${Math.round(el.getBoundingClientRect().height)}px`)
+    set()
+    const ro = new ResizeObserver(set)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [topMenu])
   // Width taken by the sidebar, so bottom-centred floating bars (quick actions dock) centre on the content.
   React.useEffect(() => {
     document.documentElement.style.setProperty('--shell-left', topMenu ? '0px' : collapsed ? '76px' : '264px')
@@ -679,7 +700,7 @@ export function Shell() {
       )}
 
       <div className={cn('transition-[padding] duration-300 ease-out-expo', !topMenu && (collapsed ? 'md:pl-[76px]' : 'md:pl-[264px]'))}>
-        <div className="sticky top-0 z-20">
+        <div ref={topRef} data-menu={menuSize} data-role={actor.role} className={cn('sticky top-0 z-20', topMenu && 'shell-top')}>
         <header className="app-head glass no-print flex h-16 items-center gap-1.5 border-b border-rule/70 px-3 sm:gap-2 sm:px-6 md:h-[68px]">
           {/* Phones: no side menu any more (the bottom bar and its More panel hold every page), so the header shows the logo and where you are. */}
           <Link to="/" className="md:hidden" aria-label="Home">
@@ -689,11 +710,11 @@ export function Shell() {
             <div key={section?.to} className="animate-ink truncate font-display text-[17px] font-semibold leading-tight tracking-[-0.02em] text-primary">{section?.label ?? 'NewsRound'}</div>
           </div>
           {topMenu && (
-            <Link to="/" className="mr-3 hidden md:block">
+            <Link to="/" className="shell-logo mr-3 hidden md:block">
               <Logo />
             </Link>
           )}
-          <div className="hidden min-w-0 flex-1 md:block">
+          <div className="shell-welcome hidden min-w-0 flex-1 md:block">
             {topMenu ? (
               <>
                 <div className="kicker text-muted-foreground">Welcome</div>
@@ -707,7 +728,7 @@ export function Shell() {
             )}
           </div>
           {lastLogin?.lastLoginAt && (
-            <div className="hidden text-right text-[12px] leading-tight text-muted-foreground xl:block">
+            <div className="shell-last hidden text-right text-[12px] leading-tight text-muted-foreground xl:block">
               <div className="kicker">Last login</div>
               <div className="font-medium text-foreground/80">
                 {fmtDateTime(lastLogin.lastLoginAt)}
@@ -715,7 +736,7 @@ export function Shell() {
               </div>
             </div>
           )}
-          <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+          <div className="shell-actions ml-auto flex items-center gap-1.5 sm:gap-2">
             {/* Light / dark / auto and the colour theme live in this one Appearance panel, on every screen size. */}
             <ThemeMenu />
             <NotificationBell />

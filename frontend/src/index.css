@@ -2820,3 +2820,68 @@ html[data-reveal] .press-line[data-in='']::after {
 /* Phone card action rows hold plain buttons too (Accept / Reject): they share the width. */
 .card-actions > div:not(.acct-actions) { display: flex; flex-wrap: wrap; gap: 8px; }
 .card-actions > div:not(.acct-actions) > button { flex: 1; }
+
+
+/* ================= Top bar: opaque, and one row when it fits ================= */
+@media (min-width: 768px) {
+  /* Solid, so page text never shows through the bar while it scrolls underneath. */
+  .shell-top { background: var(--background); box-shadow: 0 12px 26px -22px var(--shadow-color, rgb(0 0 0 / 0.5)); }
+  .shell-top > header { background: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .shell-top .nav-rail { background: color-mix(in oklab, var(--card) 70%, var(--background)); backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
+@media (min-width: 1100px) {
+  .shell-top[data-menu='few'] {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 14px;
+    padding: env(safe-area-inset-top, 0px) 24px 0;
+    min-height: 76px;
+  }
+  .shell-top[data-menu='few'] > header { display: contents; }
+  .shell-top[data-menu='few'] .shell-logo { grid-area: 1 / 1; margin: 0; }
+  .shell-top[data-menu='few'] .shell-welcome { grid-area: 1 / 2; flex: none; max-width: 14rem; padding-left: 14px; border-left: 1px solid var(--border); }
+  .shell-top[data-menu='few'][data-role='admin'] .shell-welcome { display: none; }
+  .shell-top[data-menu='few'] .shell-welcome .kicker { display: none; }
+  .shell-top[data-menu='few'] .shell-last { display: none; }
+  .shell-top[data-menu='few'] > nav { grid-area: 1 / 3; padding: 0; min-width: 0; }
+  .shell-top[data-menu='few'] .shell-actions { grid-area: 1 / 4; margin-left: 0; }
+  .shell-top[data-menu='few'] .nav-rail { border: 0; border-radius: 0; background: none; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .shell-top[data-menu='few'] .rail-list { justify-content: center; padding: 6px 0; }
+  .shell-top[data-menu='few'] .rail-list > li { flex: 0 1 auto; }
+  .shell-top[data-menu='few'] .rail-item { min-width: 0; padding: 7px 12px 8px; }
+}
+@media (min-width: 1440px) {
+  .shell-top[data-menu='many'] {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 14px;
+    padding: env(safe-area-inset-top, 0px) 24px 0;
+    min-height: 76px;
+  }
+  .shell-top[data-menu='many'] > header { display: contents; }
+  .shell-top[data-menu='many'] .shell-logo { grid-area: 1 / 1; margin: 0; }
+  .shell-top[data-menu='many'] .shell-welcome { grid-area: 1 / 2; flex: none; max-width: 14rem; padding-left: 14px; border-left: 1px solid var(--border); }
+  .shell-top[data-menu='many'][data-role='admin'] .shell-welcome { display: none; }
+  .shell-top[data-menu='many'] .shell-welcome .kicker { display: none; }
+  .shell-top[data-menu='many'] .shell-last { display: none; }
+  .shell-top[data-menu='many'] > nav { grid-area: 1 / 3; padding: 0; min-width: 0; }
+  .shell-top[data-menu='many'] .shell-actions { grid-area: 1 / 4; margin-left: 0; }
+  .shell-top[data-menu='many'] .nav-rail { border: 0; border-radius: 0; background: none; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .shell-top[data-menu='many'] .rail-list { justify-content: center; padding: 6px 0; }
+  .shell-top[data-menu='many'] .rail-list > li { flex: 0 1 auto; }
+  .shell-top[data-menu='many'] .rail-item { min-width: 0; padding: 7px 12px 8px; }
+}
+/* Sticky filter panel of the report pages: just below whatever the top bar's height is. */
+@media (min-width: 1280px) {
+  .query-rail { top: calc(var(--shell-top-h, 6.5rem) + 1rem); max-height: calc(100dvh - var(--shell-top-h, 6.5rem) - 2rem); }
+}
+/* Administrator on 1440-1639px: the nine menu entries share the row with the tools, so tighten them and keep only the avatar. */
+@media (min-width: 1440px) and (max-width: 1639px) {
+  .shell-top[data-menu='many'] { column-gap: 10px; padding-inline: 16px; }
+  .shell-top[data-menu='many'] .rail-item { padding: 7px 8px 8px; }
+  .shell-top[data-menu='many'] .rail-label { font-size: 12px; }
+  .shell-top[data-menu='many'] .shell-actions button[aria-label='Account menu'] > span:last-child { display: none; }
+}
+

@@ -171,7 +171,7 @@ export function PageHeader({ title, kicker, description, actions }: { title: Rea
           </div>
         )}
         <h1 className="animate-ink font-serif text-[32px] font-extrabold leading-[1.05] text-primary sm:text-[42px]">{title}</h1>
-        {description && <p className="mt-2 max-w-2xl text-[14.5px] text-muted-foreground">{description}</p>}
+        {description && <p className="mt-2 max-w-3xl text-[14.5px] text-muted-foreground">{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
     </div>
