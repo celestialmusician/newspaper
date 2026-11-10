@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "frontend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "frontend", "--", "--port", "5173", "--strictPort"],
+      "port": 5173
+    },
+    {
+      "name": "frontend-pwa-preview",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "preview", "--prefix", "frontend", "--", "--port", "4173", "--strictPort"],
+      "port": 4173
+    },
+    {
+      "name": "backend",
+      "runtimeExecutable": "env/Scripts/python.exe",
+      "runtimeArgs": ["backend/manage.py", "runserver", "127.0.0.1:8000"],
+      "port": 8000
+    }
+  ]
+}

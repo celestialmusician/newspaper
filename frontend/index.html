@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en-IN" data-palette="indigo" data-effects="full">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#f4f5fb" />
+    <meta name="description" content="Newspaper & magazine subscriptions, delivery routes, billing and collections for agencies." />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>NewsRound</title>
+    <script>
+      // Apply saved appearance before first paint (no theme flash).
+      ;(function () {
+        var s = {}
+        try { s = JSON.parse(localStorage.getItem('nap.theme') || '{}') } catch (e) {}
+        var m = s.mode || 'system'
+        var dark = m === 'dark' || (m === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+        var r = document.documentElement
+        if (dark) r.classList.add('dark')
+        r.style.colorScheme = dark ? 'dark' : 'light'
+        var ok = ['vermilion', 'indigo', 'forest', 'saffron', 'teal', 'plum']
+        r.dataset.palette = ok.indexOf(s.palette) >= 0 ? s.palette : 'indigo'
+        r.dataset.effects = 'full'
+      })()
+    </script>
+    <style>
+      /* Splash shown until React mounts: the masthead inks in. */
+      #splash { position: fixed; inset: 0; display: grid; place-items: center; background: #f4f5fb; color: #0f1222; z-index: 9999; transition: opacity .3s }
+      .dark #splash { background: #080912; color: #eceef7 }
+      #splash .m { font: 800 44px/1 system-ui, sans-serif; letter-spacing: -.04em; text-align: center; animation: i 1.2s cubic-bezier(.16, 1, .3, 1) both }
+      #splash .m b { background: linear-gradient(100deg, #4f46e5, #0891b2); -webkit-background-clip: text; background-clip: text; color: transparent }
+      #splash .r { width: 120px; height: 3px; margin: 16px auto 0; border-radius: 3px; background: linear-gradient(90deg, #4f46e5, #0891b2) }
+      #splash p { margin-top: 10px; font: 600 11px system-ui, sans-serif; text-align: center; letter-spacing: .24em; text-transform: uppercase; opacity: .6 }
+      @keyframes i { from { clip-path: inset(0 100% 0 0) } to { clip-path: inset(0 0 0 0) } }
+    </style>
+  </head>
+  <body>
+    <div id="splash"><div><div class="m">News<b>Round</b></div><div class="r"></div><p>Agency Suite</p></div></div>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

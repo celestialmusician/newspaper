@@ -1,0 +1,2820 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/bricolage-grotesque/opsz.css';
+@import '@fontsource-variable/plus-jakarta-sans';
+@import 'leaflet/dist/leaflet.css';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * NewsRound "Prism" design tokens.
+ * Each palette is a two-colour gradient (--brand -> --brand-2). Surfaces are frosted glass over a
+ * slowly moving colour field; light and dark modes have their own steps.
+ */
+:root {
+  --brand: #4f46e5;
+  --brand-2: #0891b2;
+  --masthead-light: #4338ca;
+  --masthead-dark: #a5b4fc;
+}
+[data-palette='vermilion'] { --brand: #e11d48; --brand-2: #ea580c; --masthead-light: #be123c; --masthead-dark: #fda4af; }
+[data-palette='forest'] { --brand: #059669; --brand-2: #65a30d; --masthead-light: #047857; --masthead-dark: #6ee7b7; }
+[data-palette='saffron'] { --brand: #d97706; --brand-2: #dc2626; --masthead-light: #b45309; --masthead-dark: #fcd34d; }
+[data-palette='teal'] { --brand: #0891b2; --brand-2: #4f46e5; --masthead-light: #0e7490; --masthead-dark: #67e8f9; }
+[data-palette='plum'] { --brand: #9333ea; --brand-2: #db2777; --masthead-light: #7e22ce; --masthead-dark: #e9b5ff; }
+
+:root {
+  --background: color-mix(in oklab, var(--brand) 4%, #f4f5fb);
+  --foreground: #0f1222;
+  --card: #ffffff;
+  --card-foreground: #0f1222;
+  --popover: #ffffff;
+  --popover-foreground: #0f1222;
+  --primary: color-mix(in oklab, var(--brand) 22%, #0d1020);
+  --primary-foreground: #ffffff;
+  --secondary: color-mix(in oklab, var(--brand) 5%, #eef0f6);
+  --secondary-foreground: #0f1222;
+  --muted: color-mix(in oklab, var(--brand) 5%, #eff1f7);
+  --muted-foreground: #586078;
+  --accent: color-mix(in oklab, var(--brand) 9%, #f1f3f9);
+  --accent-foreground: var(--primary);
+  --masthead: var(--masthead-light);
+  --destructive: #dc2626;
+  --success: #059669;
+  --warning: #c2680a;
+  --info: #2563eb;
+  --border: color-mix(in oklab, var(--brand) 9%, #e2e5ee);
+  --input: color-mix(in oklab, var(--brand) 12%, #d4d8e4);
+  --ring: var(--brand);
+  --rule: color-mix(in oklab, var(--brand) 16%, #d3d7e3);
+  --sidebar: color-mix(in oklab, var(--brand) 60%, #05060d);
+  --sidebar-foreground: #e6e8f5;
+  --paper: var(--muted);
+  --ink-panel: color-mix(in oklab, var(--brand) 55%, #06070e);
+  --radius: 0.8rem;
+  --glow: color-mix(in oklab, var(--brand) 45%, transparent);
+  --shadow-color: color-mix(in oklab, var(--brand) 30%, #0a0c1a);
+  --glass: color-mix(in oklab, #ffffff 64%, transparent);
+  --glass-strong: color-mix(in oklab, #ffffff 86%, transparent);
+  --glass-border: color-mix(in oklab, #ffffff 55%, var(--border));
+  --glass-hi: rgba(255, 255, 255, 0.9);
+  /* Soft 3D: light from the top left. */
+  --soft-hi: rgba(255, 255, 255, 0.85);
+  --soft-lo: color-mix(in oklab, var(--shadow-color) 20%, transparent);
+  --blob-opacity: 0.9;
+  --blob-ink: 34%;
+  --sheet-opacity: 0.13;
+
+  /* Gradients. */
+  --grad: linear-gradient(135deg, var(--brand) 0%, color-mix(in oklab, var(--brand) 50%, var(--brand-2)) 50%, var(--brand-2) 100%);
+  --grad-soft: linear-gradient(135deg, color-mix(in oklab, var(--brand) 13%, transparent), color-mix(in oklab, var(--brand-2) 13%, transparent));
+  --grad-deep: linear-gradient(160deg, color-mix(in oklab, var(--brand) 70%, #070814) 0%, color-mix(in oklab, color-mix(in oklab, var(--brand) 50%, var(--brand-2)) 52%, #070814) 55%, color-mix(in oklab, var(--brand-2) 62%, #070814) 100%);
+  --grad-text: linear-gradient(100deg, var(--masthead-light), color-mix(in oklab, var(--brand-2) 85%, #000));
+
+  /* Validated categorical order (dataviz validate_palette, light surface: all checks pass). */
+  --chart-1: #2f5fb3;
+  --chart-2: #d0571b;
+  --chart-3: #1f8a6b;
+  --chart-4: #8a55c4;
+  --chart-5: #c08a14;
+  --chart-good: #2f7d4f;
+  --chart-warning: #b7791f;
+  --chart-critical: #b42318;
+  --chart-neutral: #9aa1b3;
+  --chart-axis: #8a91a5;
+  --chart-grid: color-mix(in oklab, var(--brand) 6%, #e9ebf2);
+}
+
+.dark {
+  --background: color-mix(in oklab, var(--brand) 9%, #06070e);
+  --foreground: #eceef7;
+  --card: color-mix(in oklab, var(--brand) 6%, #10121c);
+  --card-foreground: #eceef7;
+  --popover: color-mix(in oklab, var(--brand) 8%, #141724);
+  --popover-foreground: #eceef7;
+  --primary: color-mix(in oklab, var(--brand) 10%, #f3f4fb);
+  --primary-foreground: #0b0d16;
+  --secondary: color-mix(in oklab, var(--brand) 10%, #171a28);
+  --secondary-foreground: #eceef7;
+  --muted: color-mix(in oklab, var(--brand) 9%, #151826);
+  --muted-foreground: #9da4bb;
+  --accent: color-mix(in oklab, var(--brand) 18%, #181c2c);
+  --masthead: var(--masthead-dark);
+  --destructive: #f87171;
+  --success: #34d399;
+  --warning: #fbbf24;
+  --info: #60a5fa;
+  --border: color-mix(in oklab, var(--brand) 16%, #1d2131);
+  --input: color-mix(in oklab, var(--brand) 18%, #2a2f42);
+  --ring: var(--masthead-dark);
+  --rule: color-mix(in oklab, var(--brand) 24%, #262b3d);
+  --sidebar-foreground: #e6e8f5;
+  --glow: color-mix(in oklab, var(--brand) 60%, transparent);
+  --shadow-color: #000000;
+  --glass: color-mix(in oklab, var(--card) 55%, transparent);
+  --glass-strong: color-mix(in oklab, var(--popover) 84%, transparent);
+  --glass-border: rgba(255, 255, 255, 0.09);
+  --glass-hi: rgba(255, 255, 255, 0.07);
+  --soft-hi: rgba(255, 255, 255, 0.05);
+  --soft-lo: rgba(0, 0, 0, 0.5);
+  --blob-opacity: 1;
+  --blob-ink: 46%;
+  --sheet-opacity: 0.16;
+  --grad-text: linear-gradient(100deg, var(--masthead-dark), color-mix(in oklab, var(--brand-2) 45%, #ffffff));
+
+  /* Dark steps of the same hues (validate_palette --mode dark: all checks pass). */
+  --chart-1: #5b86d6;
+  --chart-2: #d9733f;
+  --chart-3: #2fa07c;
+  --chart-4: #9a72d1;
+  --chart-5: #b7891f;
+  --chart-good: #3fa36b;
+  --chart-warning: #d19a2e;
+  --chart-critical: #e5534b;
+  --chart-neutral: #6b7286;
+  --chart-axis: #7d859b;
+  --chart-grid: color-mix(in oklab, var(--brand) 10%, #1d2333);
+}
+
+@theme inline {
+  /* Display (headlines, titles, figures, labels): Bricolage Grotesque. Body, forms, tables: Plus Jakarta Sans. */
+  --font-sans: 'Plus Jakarta Sans Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Bricolage Grotesque Variable', 'Plus Jakarta Sans Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Bricolage Grotesque Variable', 'Plus Jakarta Sans Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Bricolage Grotesque Variable', 'Plus Jakarta Sans Variable', ui-sans-serif, system-ui, sans-serif;
+
+  --color-paper: var(--paper);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-masthead: var(--masthead);
+  --color-brand: var(--brand);
+  --color-brand-2: var(--brand-2);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-rule: var(--rule);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-ink-panel: var(--ink-panel);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 2px);
+  --radius-2xl: calc(var(--radius) + 4px);
+
+  /* Flat newsprint surfaces; "press" = the hard offset shadow of a lifted sheet. */
+  /* Soft layered elevation: hairline + ambient. */
+  --shadow-card: inset 0 1px 0 var(--glass-hi), -5px -5px 14px var(--soft-hi), 8px 12px 26px -12px var(--soft-lo), 0 1px 2px color-mix(in oklab, var(--shadow-color) 6%, transparent);
+  --shadow-pop: inset 0 1px 0 var(--glass-hi), 0 2px 6px color-mix(in oklab, var(--shadow-color) 8%, transparent), 0 28px 60px -24px color-mix(in oklab, var(--shadow-color) 45%, transparent);
+  --shadow-press: inset 0 1px 0 var(--glass-hi), 0 0 0 1px color-mix(in oklab, var(--brand) 22%, transparent), 0 22px 44px -20px color-mix(in oklab, var(--shadow-color) 50%, transparent);
+  --shadow-glow: 0 12px 28px -12px var(--glow);
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --animate-shimmer: shimmer 1.4s linear infinite;
+  --animate-rise: rise 0.5s var(--ease-out-expo) both;
+  --animate-pop: pop 0.45s var(--ease-spring) both;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-spin-slow: spin 24s linear infinite;
+  --animate-ink: ink 0.9s var(--ease-out-expo) both;
+  --animate-unfold: unfold 0.55s var(--ease-out-expo) backwards;
+  --animate-card3d: card3d 0.7s var(--ease-out-expo) backwards;
+  --animate-flip: flip 0.75s var(--ease-out-expo) backwards;
+  --animate-drop3d: drop3d 0.8s var(--ease-out-expo) backwards;
+  @keyframes rise {
+    from { opacity: 0; transform: translate3d(0, 12px, 0); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes pop {
+    from { opacity: 0; transform: scale(0.6); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes float {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50% { transform: translate3d(0, -8px, 0); }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+  }
+  @keyframes shimmer {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+  }
+  /* A page unfolds towards the reader (route and tab changes). */
+  @keyframes unfold {
+    from { opacity: 0; transform: perspective(1400px) rotateX(7deg) translate3d(0, 18px, -30px); }
+    to { opacity: 1; transform: none; }
+  }
+  /* A card is laid down on the desk: tipped back, then flat. */
+  @keyframes card3d {
+    from { opacity: 0; transform: perspective(900px) rotateX(-38deg) translate3d(0, 24px, -60px); }
+    to { opacity: 1; transform: none; }
+  }
+  /* Split-flap departure-board digit. */
+  @keyframes flip {
+    0% { opacity: 0; transform: perspective(500px) rotateX(-95deg); }
+    60% { opacity: 1; transform: perspective(500px) rotateX(12deg); }
+    100% { opacity: 1; transform: none; }
+  }
+  /* A sheet drops in from above the page (sign-in card). */
+  @keyframes drop3d {
+    from { opacity: 0; transform: perspective(1200px) rotateX(24deg) rotateY(-10deg) translate3d(0, -40px, 80px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes spin-y {
+    from { transform: rotateY(0deg); }
+    to { transform: rotateY(360deg); }
+  }
+  /* Headline "inks in" left to right, like type hitting paper. */
+  @keyframes ink {
+    from { clip-path: inset(0 100% 0 0); opacity: 0.2; }
+    to { clip-path: inset(0 0 0 0); opacity: 1; }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    -webkit-tap-highlight-color: transparent;
+    text-size-adjust: 100%;
+    background: var(--background);
+  }
+  /* The page colour is painted by <html> only: a body background would sit above the fixed
+     z-index:-2 ambient layer (.ambient) and hide the live backdrop. */
+  body {
+    @apply text-foreground font-sans antialiased;
+    background: transparent;
+    font-size: 15px;
+    line-height: 1.55;
+    letter-spacing: -0.003em;
+    overflow-x: clip;
+  }
+  h1, h2, h3 {
+    @apply font-display;
+    letter-spacing: -0.028em;
+    font-optical-sizing: auto;
+  }
+  .font-serif {
+    letter-spacing: -0.035em;
+  }
+  /* Keyboard ring on real controls only. Containers (dialog panels, rows, cards) and text fields
+     (which draw their own gradient border) never show a line when clicked. */
+  :focus-visible {
+    outline: none;
+  }
+  a:focus-visible,
+  button:focus-visible,
+  summary:focus-visible,
+  [role='button']:focus-visible,
+  [role='tab']:focus-visible,
+  [role='menuitem']:focus-visible,
+  [role='checkbox']:focus-visible,
+  [role='switch']:focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+  [tabindex='-1']:focus,
+  [tabindex='-1']:focus-visible {
+    outline: none;
+  }
+  body {
+    caret-color: transparent;
+  }
+  /* Tailwind v4 resets buttons to the arrow; show the hand on anything clickable. */
+  button:not(:disabled), [role='button']:not([aria-disabled='true']), select:not(:disabled), summary { cursor: pointer; }
+  input, textarea, select, [contenteditable='true'] {
+    caret-color: color-mix(in oklab, var(--brand) 65%, var(--foreground));
+  }
+  /* Blinking caret drawn in the next empty MPIN / OTP box (the real input is invisible). */
+  .pin-caret {
+    width: 2px;
+    height: 1.75rem;
+    border-radius: 2px;
+    background: color-mix(in oklab, var(--brand) 65%, var(--foreground));
+    animation: pin-blink 1.05s steps(1) infinite;
+  }
+  @keyframes pin-blink { 50% { opacity: 0; } }
+  ::selection {
+    background: color-mix(in oklab, var(--brand) 28%, transparent);
+  }
+  input, select, textarea {
+    color-scheme: inherit;
+  }
+}
+
+@layer components {
+  /* Solid printing-ink fill (name kept: used by buttons, chips and bars across the app). */
+  .bg-brand-gradient {
+    background-color: var(--brand);
+    background-image: var(--grad);
+  }
+  .bg-brand-soft {
+    background-image: var(--grad-soft);
+  }
+  /* Gradient ink for headline accents. */
+  .text-gradient {
+    background-image: var(--grad-text);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+  /* Deep gradient surface: sidebar, drawer, sign-in panel. Adds a slowly drifting light. */
+  .grad-deep {
+    position: relative;
+    isolation: isolate;
+    background: var(--grad-deep);
+  }
+  .grad-deep::before {
+    content: '';
+    position: absolute;
+    inset: -30%;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(40% 30% at 20% 15%, color-mix(in oklab, var(--brand) 55%, #ffffff) 0%, transparent 70%),
+      radial-gradient(35% 30% at 85% 80%, color-mix(in oklab, var(--brand-2) 60%, transparent) 0%, transparent 70%);
+    opacity: 0.55;
+    animation: glow-drift 22s ease-in-out infinite alternate;
+    will-change: transform;
+  }
+  @keyframes glow-drift { to { transform: translate3d(6%, 8%, 0) rotate(8deg); } }
+
+  /* Always-dark gradient panel (welcome card, invoice header, executive route card). */
+  .hero-panel {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    color: #ffffff;
+    background: var(--grad-deep);
+  }
+  .hero-panel::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: radial-gradient(60% 80% at 100% 0%, color-mix(in oklab, var(--brand-2) 45%, transparent), transparent 70%);
+  }
+
+  /* Dashboard hero: glass card washed with the palette gradient. */
+  .hero-mesh {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background-color: var(--glass);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-pop);
+  }
+  .hero-mesh::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      radial-gradient(55% 90% at 0% 0%, color-mix(in oklab, var(--brand) 22%, transparent), transparent 70%),
+      radial-gradient(50% 90% at 100% 100%, color-mix(in oklab, var(--brand-2) 22%, transparent), transparent 70%);
+  }
+
+  /* Sticky chrome (header, bottom bar, sidebar): frosted glass. */
+  .glass {
+    background: color-mix(in oklab, var(--background) 72%, transparent);
+    backdrop-filter: blur(18px) saturate(1.5);
+    -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  }
+
+  /* Content blocks: translucent frosted panels. The blur itself is added only where it is cheap
+     (desktop, full effects) further down; phones get the translucent tint over the soft background. */
+  .glass-card {
+    background-color: var(--glass);
+    border-color: var(--glass-border);
+    box-shadow: var(--shadow-card);
+    transition: box-shadow 0.35s var(--ease-out-expo), border-color 0.35s var(--ease-out-expo), background-color 0.35s;
+  }
+  @media (hover: hover) {
+    .glass-card:hover {
+      border-color: color-mix(in oklab, var(--brand) 30%, var(--glass-border));
+      box-shadow: var(--shadow-press);
+    }
+  }
+  /* Reading lamp (after React Bits "SpotlightCard"): a pool of brand light under the pointer.
+     tilt.ts writes --sx / --sy on the hovered card only; --lamp fades it in and out. */
+  @media (hover: hover) and (pointer: fine) {
+    :root[data-effects='full'] .glass-card {
+      background-image: radial-gradient(300px circle at var(--sx, 50%) var(--sy, 0%), color-mix(in oklab, var(--brand) var(--lamp), transparent), transparent 70%);
+      transition: box-shadow 0.35s var(--ease-out-expo), border-color 0.35s var(--ease-out-expo), background-color 0.35s, --lamp 0.5s var(--ease-out-expo);
+    }
+    :root[data-effects='full'] .glass-card:hover { --lamp: 14%; }
+    :root[data-effects='full'].dark .glass-card:hover { --lamp: 20%; }
+  }
+  /* Inputs: the border turns into the palette gradient on focus (padding-box / border-box trick). */
+  .field-grad:focus-visible:not([aria-invalid='true']) {
+    border-color: transparent;
+    background: linear-gradient(var(--card), var(--card)) padding-box, var(--grad) border-box;
+  }
+  .glass-tint {
+    background-color: var(--glass-strong);
+    border-color: var(--glass-border);
+  }
+  .glass-pop {
+    background-color: var(--glass-strong);
+    border-color: var(--glass-border);
+    backdrop-filter: blur(22px) saturate(1.6);
+    -webkit-backdrop-filter: blur(22px) saturate(1.6);
+  }
+
+  /* Kept for compatibility; the broadsheet look uses the press shadow instead of a sheen. */
+  .sheen {
+    position: relative;
+  }
+
+  /* Small-caps label in typewriter mono — the newspaper "kicker". */
+  .kicker {
+    font-family: var(--font-display);
+    font-size: 11px;
+    font-weight: 650;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Block that lifts towards the reader on hover. */
+  .press {
+    transition: transform 0.3s var(--ease-out-expo), box-shadow 0.3s var(--ease-out-expo), border-color 0.25s;
+  }
+  @media (hover: hover) {
+    .press:hover {
+      transform: translate3d(0, -3px, 0);
+      box-shadow: var(--shadow-press);
+      border-color: color-mix(in oklab, var(--brand) 30%, var(--glass-border));
+    }
+  }
+  .press:active {
+    transform: translate3d(0, -1px, 0) scale(0.99);
+  }
+
+  /* ---- Soft 3D: raised buttons, embossed icon chips, floating tiles, pressed-in fields ---- */
+  .btn-3d {
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.34), inset 0 -2px 0 rgb(0 0 0 / 0.14), 0 3px 0 var(--edge, rgb(0 0 0 / 0.3)), 0 12px 18px -8px var(--glow);
+    transition: transform 0.18s var(--ease-out-expo), box-shadow 0.18s var(--ease-out-expo), background-position 0.5s, background-color 0.2s;
+  }
+  .btn-3d:hover {
+    transform: translate3d(0, -1px, 0);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.4), inset 0 -2px 0 rgb(0 0 0 / 0.14), 0 4px 0 var(--edge, rgb(0 0 0 / 0.3)), 0 16px 24px -8px var(--glow);
+  }
+  .btn-3d:active {
+    transform: translate3d(0, 3px, 0);
+    box-shadow: inset 0 2px 5px rgb(0 0 0 / 0.25), 0 0 0 var(--edge, rgb(0 0 0 / 0.3)), 0 2px 6px -2px var(--glow);
+  }
+  .soft-raised {
+    box-shadow: inset 0 1px 0 var(--glass-hi), -4px -4px 10px var(--soft-hi), 5px 7px 14px -4px var(--soft-lo);
+    transition: transform 0.2s var(--ease-out-expo), box-shadow 0.2s var(--ease-out-expo), background-color 0.2s, border-color 0.2s;
+  }
+  .soft-raised:hover {
+    transform: translate3d(0, -2px, 0);
+    box-shadow: inset 0 1px 0 var(--glass-hi), -5px -5px 12px var(--soft-hi), 8px 12px 20px -6px var(--soft-lo);
+  }
+  .soft-raised:active {
+    transform: translate3d(0, 0, 0);
+    box-shadow: inset 2px 3px 6px var(--soft-lo), inset -2px -2px 5px var(--soft-hi);
+  }
+  .soft-inset {
+    box-shadow: inset 1px 2px 4px var(--soft-lo), inset -1px -1px 3px var(--soft-hi);
+  }
+  /* Rounded icon chip with a bevel: light on top, shade underneath, a short drop shadow. */
+  .chip-3d {
+    box-shadow: inset 0 2px 2px rgb(255 255 255 / 0.5), inset 0 -3px 5px rgb(0 0 0 / 0.22), 4px 7px 12px -5px color-mix(in oklab, var(--shadow-color) 60%, transparent);
+  }
+  /* Quick-navigation tile: floats above the card and sinks when pressed. */
+  .tile-3d {
+    background-color: color-mix(in oklab, var(--card) 80%, transparent);
+    border: 1px solid var(--glass-border);
+    box-shadow: inset 0 1px 0 var(--glass-hi), -4px -4px 10px var(--soft-hi), 6px 9px 16px -6px var(--soft-lo);
+    transition: transform 0.25s var(--ease-out-expo), box-shadow 0.25s var(--ease-out-expo), border-color 0.2s;
+  }
+  .tile-3d .chip-3d { transition: transform 0.35s var(--ease-out-expo); }
+  .tile-3d:hover {
+    transform: translate3d(0, -4px, 0);
+    border-color: color-mix(in oklab, var(--brand) 32%, var(--glass-border));
+    box-shadow: inset 0 1px 0 var(--glass-hi), -5px -5px 12px var(--soft-hi), 10px 18px 26px -8px var(--soft-lo);
+  }
+  .tile-3d:hover .chip-3d { transform: translate3d(0, -3px, 0) scale(1.06); }
+  .tile-3d:active {
+    transform: translate3d(0, 0, 0);
+    box-shadow: inset 2px 3px 7px var(--soft-lo), inset -2px -2px 5px var(--soft-hi);
+  }
+
+  /* Bottom dock: a tinted frosted-glass bar with a lit rim and glow, so it stands out from any page behind it. */
+  .dock-glass {
+    position: relative;
+    background:
+      linear-gradient(180deg, rgb(255 255 255 / 0.2), rgb(255 255 255 / 0.04)),
+      color-mix(in oklab, var(--brand) 46%, rgb(8 10 30 / 0.78));
+    border: 1px solid rgb(255 255 255 / 0.32);
+    backdrop-filter: blur(24px) saturate(1.9);
+    -webkit-backdrop-filter: blur(24px) saturate(1.9);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.5),
+      inset 0 -1px 0 rgb(0 0 0 / 0.3),
+      0 0 0 6px color-mix(in oklab, var(--brand) 14%, transparent),
+      0 26px 50px -14px color-mix(in oklab, var(--brand) 75%, #000),
+      0 0 44px -10px var(--glow);
+  }
+  /* A band of light slides across the glass. */
+  .dock-glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(100deg, transparent 35%, rgb(255 255 255 / 0.26) 50%, transparent 65%);
+    background-size: 260% 100%;
+    background-position: 130% 0;
+    animation: dock-shine 6s ease-in-out infinite;
+  }
+  @keyframes dock-shine {
+    0%, 30% { background-position: 130% 0; }
+    80%, 100% { background-position: -30% 0; }
+  }
+  /* Glossy bubble: a bright cap on the top half of each chip. */
+  .dock-chip::after {
+    content: '';
+    position: absolute;
+    inset: 2px 3px 52% 3px;
+    border-radius: 14px 14px 12px 12px;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.55), rgb(255 255 255 / 0));
+  }
+  [data-effects='lite'] .dock-glass { backdrop-filter: none; -webkit-backdrop-filter: none; }
+  /* Phone bottom bar: own compositor layer, lighter blur and no repainting shine, so scrolling underneath stays smooth. */
+  .dock-bar { transform: translateZ(0); contain: layout style; }
+  .dock-bar .dock-glass {
+    backdrop-filter: blur(14px) saturate(1.6);
+    -webkit-backdrop-filter: blur(14px) saturate(1.6);
+  }
+  .dock-bar .dock-glass::before { animation: none; display: none; }
+  /* Ambient motion stands still while the page is scrolling. */
+  :root[data-scrolling] .idle-sheen,
+  :root[data-scrolling] .idle-icon,
+  :root[data-scrolling] .idle-live,
+  :root[data-scrolling] .idle-ring,
+  :root[data-scrolling] .idle-dot::after,
+  :root[data-scrolling] .idle-courier-ride,
+  :root[data-scrolling] .idle-courier-ride svg,
+  :root[data-scrolling] .idle-wheel,
+  :root[data-scrolling] .idle-paper,
+  :root[data-scrolling] .ambient > i,
+  :root[data-scrolling] .ambient > b,
+  :root[data-scrolling] .ambient > s,
+  :root[data-scrolling] .ambient > u,
+  :root[data-scrolling] .dock-glass::before { animation-play-state: paused; }
+  /* Phones and narrow tablets: keep the customer's call button clear of the quick-actions pill. */
+  @media (max-width: 1023.98px) {
+    body:has(.quick-compact) .support-cta { bottom: calc(8.25rem + env(safe-area-inset-bottom)) !important; }
+  }
+  [data-effects='lite'] .dock-glass::before { animation: none; }
+
+  /* Bottom dock: icons rise and grow towards the pointer, like a floating toolbar. */
+  .tile-dock { transition: transform 0.3s var(--ease-out-expo); }
+  .tile-dock .chip-3d { transition: transform 0.3s var(--ease-out-expo), box-shadow 0.3s var(--ease-out-expo); }
+  .tile-dock:hover { transform: translate3d(0, -6px, 0) scale(1.14); }
+  .tile-dock:active { transform: translate3d(0, -1px, 0) scale(1.02); }
+  .tile-dock:active .chip-3d { box-shadow: inset 0 3px 6px rgb(0 0 0 / 0.3); }
+
+  /* Newspaper rules. */
+  .rule-double {
+    border-bottom: 1px solid var(--border);
+  }
+  .rule-thick {
+    border-top: 1px solid var(--border);
+  }
+
+  /* Ambient background: three soft ink clouds and a faint dot grid drifting very slowly.
+     Pre-blurred radial gradients (no filter) on their own fixed layer; only transform animates. */
+  .ambient {
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    overflow: hidden;
+    pointer-events: none;
+    contain: strict;
+  }
+  .ambient > i {
+    position: absolute;
+    width: 58vmax;
+    height: 58vmax;
+    border-radius: 50%;
+    opacity: var(--blob-opacity);
+    will-change: transform;
+  }
+  .ambient > i:nth-child(1) { top: -24vmax; left: -16vmax; background: radial-gradient(closest-side, color-mix(in oklab, var(--brand) var(--blob-ink), transparent), transparent); animation: drift-a 24s ease-in-out infinite alternate; }
+  .ambient > i:nth-child(2) { top: -16vmax; right: -22vmax; background: radial-gradient(closest-side, color-mix(in oklab, var(--brand-2) var(--blob-ink), transparent), transparent); animation: drift-b 28s ease-in-out infinite alternate; }
+  .ambient > i:nth-child(3) { bottom: -28vmax; left: 24vw; background: radial-gradient(closest-side, color-mix(in oklab, color-mix(in oklab, var(--brand) 50%, var(--brand-2)) calc(var(--blob-ink) * 0.8), transparent), transparent); animation: drift-c 26s ease-in-out infinite alternate; }
+  /* A smaller cloud wandering through the middle so the centre of the page is alive too. */
+  .ambient > i:nth-child(4) { width: 40vmax; height: 40vmax; top: 30vh; left: 18vw; background: radial-gradient(closest-side, color-mix(in oklab, var(--brand-2) calc(var(--blob-ink) * 0.55), transparent), transparent); animation: drift-d 32s ease-in-out infinite alternate; }
+  /* Folded newspapers floating up through the page: one tinted shape cut by an SVG mask. */
+  .ambient > u {
+    position: absolute;
+    bottom: -90px;
+    width: var(--s, 54px);
+    aspect-ratio: 4 / 3;
+    background: color-mix(in oklab, var(--brand) 70%, var(--foreground));
+    -webkit-mask: var(--sheet) center / contain no-repeat;
+    mask: var(--sheet) center / contain no-repeat;
+    opacity: 0;
+    will-change: transform, opacity;
+    animation: sheet-float var(--d, 34s) linear infinite;
+    animation-delay: var(--delay, 0s);
+    --sheet: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 36' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M4 3h34v28a2 2 0 0 0 4 0V9h3v22a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z' stroke-linejoin='round'/%3E%3Cpath d='M9 9h24M9 15h10M9 20h10M9 25h10M24 15h9v10h-9z'/%3E%3C/svg%3E");
+  }
+  @keyframes sheet-float {
+    0% { transform: translate3d(0, 0, 0) rotate(var(--r0, -12deg)); opacity: 0; }
+    12% { opacity: var(--sheet-opacity); }
+    85% { opacity: var(--sheet-opacity); }
+    100% { transform: translate3d(var(--x, 60px), -118vh, 0) rotate(var(--r1, 14deg)); opacity: 0; }
+  }
+  /* Tiny lights rising through the page. */
+  .ambient > s {
+    position: absolute;
+    bottom: -12px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--grad);
+    opacity: 0;
+    will-change: transform, opacity;
+    animation: rise-up var(--d, 18s) linear infinite;
+    animation-delay: var(--delay, 0s);
+  }
+  @keyframes rise-up {
+    0% { transform: translate3d(0, 0, 0) scale(0.6); opacity: 0; }
+    10% { opacity: 0.55; }
+    90% { opacity: 0.35; }
+    100% { transform: translate3d(var(--x, 40px), -105vh, 0) scale(1.1); opacity: 0; }
+  }
+  .ambient > b {
+    position: absolute;
+    inset: -64px;
+    background-image: radial-gradient(color-mix(in oklab, var(--foreground) 16%, transparent) 1px, transparent 1.4px);
+    background-size: 32px 32px;
+    opacity: 0.35;
+    mask-image: radial-gradient(70% 60% at 50% 40%, #000, transparent 85%);
+    will-change: transform;
+    animation: dots-drift 24s linear infinite;
+  }
+  /* Three-stop paths (played back and forth) so the clouds wander instead of sliding on a line. */
+  @keyframes drift-a { 50% { transform: translate3d(14vmax, 4vmax, 0) scale(1.15); } to { transform: translate3d(6vmax, 14vmax, 0) scale(0.95); } }
+  @keyframes drift-b { 50% { transform: translate3d(-8vmax, 14vmax, 0) scale(0.88); } to { transform: translate3d(-16vmax, 4vmax, 0) scale(1.1); } }
+  @keyframes drift-c { 50% { transform: translate3d(-14vmax, -4vmax, 0) scale(1.12); } to { transform: translate3d(6vmax, -10vmax, 0) scale(0.92); } }
+  @keyframes drift-d { 50% { transform: translate3d(28vw, -10vh, 0) scale(1.2); } to { transform: translate3d(8vw, 18vh, 0) scale(0.9); } }
+  @keyframes dots-drift { to { transform: translate3d(32px, 32px, 0); } }
+
+  /* Fixed newsprint backdrop: paper fibre noise. Static. */
+  .newsprint {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    contain: strict;
+    opacity: var(--grain-opacity);
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .38 0 0 0 0 .28 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Staggered entrance for direct children. */
+  .stagger > * { animation: rise 0.55s var(--ease-out-expo) both; }
+  .stagger > *:nth-child(2) { animation-delay: 45ms; }
+  .stagger > *:nth-child(3) { animation-delay: 90ms; }
+  .stagger > *:nth-child(4) { animation-delay: 135ms; }
+  .stagger > *:nth-child(5) { animation-delay: 180ms; }
+  .stagger > *:nth-child(6) { animation-delay: 225ms; }
+  .stagger > *:nth-child(n + 7) { animation-delay: 270ms; }
+
+  /* Scrolling news ticker (transform only; pauses on hover / focus). */
+  .ticker {
+    mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  }
+  .ticker-track {
+    display: flex;
+    width: max-content;
+    animation: ticker var(--ticker-duration, 40s) linear infinite;
+  }
+  .ticker:hover .ticker-track,
+  .ticker:focus-within .ticker-track { animation-play-state: paused; }
+  @keyframes ticker { to { transform: translate3d(-50%, 0, 0); } }
+
+  /* Sign-in side panel: live scene. Transform and opacity only. */
+  .live-dots {
+    position: absolute;
+    inset: -40px;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.55;
+    background-image: radial-gradient(rgb(255 255 255 / 0.4) 1px, transparent 1.4px);
+    background-size: 28px 28px;
+    mask-image: radial-gradient(75% 65% at 68% 42%, #000, transparent 80%);
+    will-change: transform;
+    animation: dots-drift 16s linear infinite;
+  }
+  /* Phone sign-in footer (live stats + cyclist) only on the first screen, and only when the height allows. */
+  .auth-foot-lane, .auth-foot-feed { display: none; }
+  @media (min-height: 900px) { .auth-root:has([data-auth-step='identify']) .auth-foot-lane { display: block; } }
+  @media (min-height: 900px) { .auth-root:has([data-auth-step='identify']) .auth-foot-feed { display: block; } }
+  /* Sign-in live feed: the list slides down one line per tick (the extra line is clipped). */
+  .feed-slide { animation: feed-slide 0.65s var(--ease-out-expo) backwards; }
+  @keyframes feed-slide { from { transform: translateY(-3.25rem); } }
+  .feed-slide > :first-child { animation: fade-in 0.65s ease-out backwards; }
+  [data-effects='lite'] .feed-slide, [data-effects='lite'] .feed-slide > :first-child { animation: none; }
+  .pulse-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1px solid rgb(255 255 255 / 0.4);
+    background: radial-gradient(closest-side, transparent 70%, rgb(255 255 255 / 0.07));
+    opacity: 0;
+    will-change: transform, opacity;
+    animation: ring-out 7.2s ease-out infinite;
+    animation-delay: var(--delay, 0s);
+  }
+  @keyframes ring-out {
+    0% { transform: scale(0.4); opacity: 0; }
+    14% { opacity: 0.6; }
+    100% { transform: scale(1.25); opacity: 0; }
+  }
+  .float-card {
+    will-change: transform;
+    animation: float-card var(--d, 7s) ease-in-out infinite;
+    animation-delay: var(--delay, 0s);
+  }
+  @keyframes float-card {
+    0%, 100% { transform: translate3d(0, 0, 0) rotate(-0.8deg); }
+    50% { transform: translate3d(0, -11px, 0) rotate(0.8deg); }
+  }
+  /* A soft highlight glides across the stat tiles. */
+  .sheen-bar {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 45%;
+    pointer-events: none;
+    background: linear-gradient(100deg, transparent, rgb(255 255 255 / 0.16), transparent);
+    transform: translate3d(-130%, 0, 0) skewX(-18deg);
+    will-change: transform;
+    animation: sheen 7s ease-in-out infinite;
+    animation-delay: var(--delay, 0s);
+  }
+  /* Login side panel: a van drives past the houses. */
+  .lane { container-type: inline-size; }
+  .lane-truck {
+    will-change: transform;
+    animation: truck 14s linear infinite;
+  }
+  @keyframes truck {
+    from { transform: translate3d(-48px, 0, 0); }
+    to { transform: translate3d(calc(100cqw + 8px), 0, 0); }
+  }
+  .lane-house {
+    opacity: 0.4;
+    will-change: transform, opacity;
+    animation: house 14s ease-out infinite;
+    animation-delay: var(--delay, 0s);
+  }
+  .lane-pedal { animation: lane-bob 0.7s ease-in-out infinite; will-change: transform; }
+  @keyframes lane-bob {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50% { transform: translate3d(0, -2px, 0); }
+  }
+  .lane-paper {
+    opacity: 0;
+    will-change: transform, opacity;
+    animation: lane-toss 14s linear infinite;
+    animation-delay: var(--delay, 0s);
+  }
+  @keyframes lane-toss {
+    0% { opacity: 0; transform: translate3d(-40px, -12px, 0) rotate(0deg); }
+    1.2% { opacity: 1; transform: translate3d(-40px, -12px, 0) rotate(0deg); }
+    4% { opacity: 1; transform: translate3d(-20px, -30px, 0) rotate(170deg); }
+    7% { opacity: 1; transform: translate3d(-2px, 2px, 0) rotate(330deg); }
+    9.5% { opacity: 0; transform: translate3d(-2px, 2px, 0) rotate(330deg); }
+    100% { opacity: 0; transform: translate3d(-2px, 2px, 0) rotate(330deg); }
+  }
+  @keyframes house {
+    0% { opacity: 0.4; transform: translate3d(0, 0, 0); }
+    3% { opacity: 1; transform: translate3d(0, -4px, 0) scale(1.18); }
+    14% { opacity: 1; transform: translate3d(0, -4px, 0) scale(1.18); }
+    26%, 100% { opacity: 0.4; transform: translate3d(0, 0, 0); }
+  }
+  /* Sidebar and drawer: one light glides top to bottom along the edge, one soft band washes down behind the menu. */
+  .flow-beam {
+    position: absolute;
+    inset: 0 0 0 auto;
+    width: 3px;
+    overflow: hidden;
+    pointer-events: none;
+    background: rgb(255 255 255 / 0.14);
+  }
+  .flow-beam::after {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 18%;
+    background: linear-gradient(to bottom, transparent, #fff 55%, transparent);
+    box-shadow: 0 0 16px 3px rgb(255 255 255 / 0.55);
+    transform: translate3d(0, -100%, 0);
+    will-change: transform;
+    animation: flow-beam 4.8s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+  }
+  @keyframes flow-beam {
+    0% { transform: translate3d(0, -100%, 0); }
+    80%, 100% { transform: translate3d(0, 640%, 0); }
+  }
+  .flow-down::after {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 42%;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(to bottom, transparent, rgb(255 255 255 / 0.15), transparent);
+    transform: translate3d(0, -100%, 0);
+    will-change: transform;
+    animation: flow-band 8s ease-in-out infinite;
+  }
+  @keyframes flow-band {
+    0% { transform: translate3d(0, -100%, 0); }
+    100% { transform: translate3d(0, 260%, 0); }
+  }
+  /* Menu: items glide in one after another; the active pill breathes; the logo catches the light. */
+  .nav-in { animation: nav-in 0.55s var(--ease-out-expo) backwards; }
+  @keyframes nav-in {
+    from { opacity: 0; transform: translate3d(-18px, 0, 0); }
+    to { opacity: 1; transform: none; }
+  }
+  .nav-pulse {
+    border: 2px solid rgb(255 255 255 / 0.85);
+    opacity: 0;
+    will-change: transform, opacity;
+    animation: nav-pulse 2.8s ease-out infinite;
+  }
+  @keyframes nav-pulse {
+    0% { transform: scale(1); opacity: 0.8; }
+    70%, 100% { transform: scale(1.06, 1.22); opacity: 0; }
+  }
+  .logo-shine::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 30%, rgb(255 255 255 / 0.6) 50%, transparent 70%);
+    transform: translate3d(-120%, 0, 0);
+    will-change: transform;
+    animation: logo-shine 4.5s ease-in-out infinite;
+  }
+  @keyframes logo-shine {
+    0%, 55% { transform: translate3d(-120%, 0, 0); }
+    100% { transform: translate3d(120%, 0, 0); }
+  }
+
+  /* Floating call to action: gentle bob plus a soft pulse ring. */
+  .cta-bob {
+    will-change: transform;
+    animation: cta-bob 3.6s ease-in-out infinite;
+  }
+  .cta-bob:has([data-state='open']) { animation-play-state: paused; }
+  /* The handset rings now and then. */
+  .cta-phone {
+    transform-origin: 50% 50%;
+    animation: phone-ring 4.2s ease-in-out infinite;
+  }
+  @keyframes phone-ring {
+    0%, 14%, 100% { transform: rotate(0); }
+    2% { transform: rotate(-18deg); }
+    4% { transform: rotate(16deg); }
+    6% { transform: rotate(-14deg); }
+    8% { transform: rotate(12deg); }
+    10% { transform: rotate(-7deg); }
+    12% { transform: rotate(4deg); }
+  }
+  @keyframes cta-bob {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50% { transform: translate3d(0, -9px, 0); }
+  }
+  .cta-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    background: var(--grad);
+    opacity: 0;
+    will-change: transform, opacity;
+    animation: cta-ring 2.8s ease-out infinite;
+  }
+  @keyframes cta-ring {
+    0% { transform: scale(1); opacity: 0.5; }
+    70%, 100% { transform: scale(1.28, 1.7); opacity: 0; }
+  }
+  @keyframes sheen {
+    0%, 55% { transform: translate3d(-130%, 0, 0) skewX(-18deg); }
+    100% { transform: translate3d(330%, 0, 0) skewX(-18deg); }
+  }
+
+  /* Radix overlay motion. */
+  .overlay-fade[data-state='open'] { animation: fade-in 0.25s ease-out both; }
+  .overlay-fade[data-state='closed'] { animation: fade-out 0.18s ease-in both; }
+  .pop-in[data-state='open'], .pop-in[data-state$='-open'] { animation: pop-in 0.22s var(--ease-out-expo) both; }
+  .pop-in[data-state='closed'] { animation: fade-out 0.12s ease-in both; }
+  .dialog-in[data-state='open'] { animation: sheet-up 0.42s var(--ease-out-expo) both; }
+  .dialog-in[data-state='closed'] { animation: sheet-down 0.22s ease-in both; }
+  @media (min-width: 640px) {
+    .dialog-in[data-state='open'] { animation: dialog-in 0.4s var(--ease-out-expo) both; }
+    .dialog-in[data-state='closed'] { animation: dialog-out 0.16s ease-in both; }
+  }
+  .sheet-left[data-state='open'] { animation: slide-left-in 0.4s var(--ease-out-expo) both; }
+  .sheet-left[data-state='closed'] { animation: slide-left-out 0.2s ease-in both; }
+  .sheet-right[data-state='open'] { animation: slide-right-in 0.4s var(--ease-out-expo) both; }
+  .sheet-right[data-state='closed'] { animation: slide-right-out 0.2s ease-in both; }
+
+  @keyframes fade-in { from { opacity: 0; } }
+  @keyframes fade-out { to { opacity: 0; } }
+  @keyframes pop-in { from { opacity: 0; transform: translateY(-4px) scale(0.97); } }
+  @keyframes sheet-up { from { transform: translateY(100%); } }
+  @keyframes sheet-down { to { transform: translateY(100%); } }
+  /* Dialogs unfold like a sheet of paper (Tailwind centring uses `translate`, these use `transform`). */
+  @keyframes dialog-in { from { opacity: 0; transform: perspective(1200px) rotateX(-10deg) translateY(20px) scale(0.97); } }
+  @keyframes dialog-out { to { opacity: 0; transform: translateY(8px) scale(0.98); } }
+  @keyframes slide-left-in { from { transform: translateX(-100%); } }
+  @keyframes slide-left-out { to { transform: translateX(-100%); } }
+  @keyframes slide-right-in { from { transform: translateX(100%); } }
+  @keyframes slide-right-out { to { transform: translateX(100%); } }
+
+  /* Dropdown: the panel unfolds from the field like a folded sheet, a masthead rule draws across the
+     top, then the options rise in one by one. */
+  .sel-pop { position: relative; transform-origin: var(--radix-popover-content-transform-origin, 50% 0); }
+  .sel-pop[data-state='open'] { animation: sel-unfold 0.5s var(--ease-out-expo) backwards; }
+  .sel-pop[data-state='closed'] { animation: sel-fold 0.14s ease-in forwards; }
+  .sel-pop::before {
+    content: '';
+    position: absolute;
+    inset: 0 12px auto;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--grad);
+    transform-origin: 0 50%;
+    pointer-events: none;
+  }
+  .sel-pop[data-state='open']::before { animation: sel-rule 0.55s 0.08s var(--ease-out-expo) backwards; }
+  @keyframes sel-unfold {
+    from { opacity: 0; clip-path: inset(0 0 96% 0 round 16px); transform: perspective(640px) rotateX(-34deg) scaleY(0.72); }
+    55% { opacity: 1; }
+  }
+  @keyframes sel-fold { to { opacity: 0; transform: perspective(640px) rotateX(-18deg) scaleY(0.85); } }
+  @keyframes sel-rule { from { transform: scaleX(0); } }
+  .sel-list { scrollbar-width: thin; scrollbar-color: color-mix(in oklab, var(--brand) 35%, transparent) transparent; padding-top: 2px; }
+  .sel-opt {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-block: 1px;
+    border-radius: 0.75rem;
+    padding: 0.625rem 0.75rem 0.625rem 0.875rem;
+    font-size: 15px;
+    line-height: 1.25rem;
+    cursor: pointer;
+    transition: background-color 0.15s, transform 0.25s var(--ease-spring), color 0.15s;
+  }
+  .sel-pop[data-state='open'] .sel-opt { animation: sel-rise 0.4s calc(var(--i) * 30ms + 70ms) var(--ease-out-expo) backwards; }
+  @keyframes sel-rise { from { opacity: 0; transform: translateY(-8px) rotateX(-40deg); } }
+  .sel-opt::before {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 24%;
+    bottom: 24%;
+    width: 3px;
+    border-radius: 3px;
+    background: var(--grad);
+    transform: scaleY(0);
+    transition: transform 0.3s var(--ease-spring);
+  }
+  .sel-opt[data-active='true'] { background: var(--grad-soft); transform: translateX(3px); }
+  .sel-opt[data-active='true']::before { transform: scaleY(0.55); }
+  .sel-opt[aria-selected='true'] { font-weight: 650; color: var(--masthead); }
+  .sel-opt[aria-selected='true']::before { transform: scaleY(1); }
+  .sel-opt[aria-disabled='true'] { opacity: 0.45; cursor: not-allowed; transform: none; background: none; }
+  [data-effects='lite'] .sel-pop[data-state='open'] { animation: pop-in 0.15s ease-out both !important; }
+  [data-effects='lite'] .sel-pop::before,
+  [data-effects='lite'] .sel-opt { animation: none !important; }
+
+  /* Calendar (date / month picker): rides on the .sel-pop unfold; days rise row by row, months slide in the travel direction. */
+  .cal-nav { display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: 0.65rem; color: var(--muted-foreground); transition: background-color 0.15s, color 0.15s, transform 0.2s var(--ease-spring); }
+  .cal-nav:hover { background: var(--accent); color: var(--masthead); }
+  .cal-nav:active { transform: scale(0.88); }
+  .cal-grid { animation: cal-in 0.38s var(--ease-out-expo) backwards; }
+  @keyframes cal-in { from { opacity: 0; transform: translateX(calc(var(--dir, 1) * 22px)); } }
+  .cal-day {
+    position: relative;
+    display: grid;
+    place-items: center;
+    height: 2.25rem;
+    border-radius: 0.75rem;
+    font-size: 14px;
+    font-weight: 550;
+    font-variant-numeric: tabular-nums;
+    color: var(--foreground);
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s, transform 0.2s var(--ease-spring), box-shadow 0.2s;
+  }
+  .cal-day.cal-wide { height: 2.9rem; }
+  .cal-day.is-sun:not(.is-sel) { color: var(--masthead); }
+  .sel-pop[data-state='open'] .cal-day { animation: sel-rise 0.4s calc(var(--r, 0) * 40ms + 90ms) var(--ease-out-expo) backwards; }
+  .cal-day:hover:not([aria-disabled='true']):not(.is-sel) { background: var(--grad-soft); transform: translateY(-1px) scale(1.06); }
+  .cal-day:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 38%, transparent); }
+  .cal-day.is-today:not(.is-sel) { color: var(--masthead); font-weight: 800; box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--masthead) 55%, transparent); }
+  .cal-day.is-sel { background: var(--grad); color: #fff; font-weight: 800; box-shadow: 0 8px 18px -8px var(--glow); }
+  .cal-day[aria-disabled='true'] { opacity: 0.28; cursor: not-allowed; }
+  [data-effects='lite'] .cal-grid, [data-effects='lite'] .cal-day { animation: none !important; }
+
+  /* Welcome overlay after sign-in. */
+  .welcome-veil { animation: veil 1.9s var(--ease-out-expo) both; }
+  .welcome-veil .welcome-card { animation: welcome-card 1.9s var(--ease-out-expo) both; transform-origin: 50% 0; }
+  @keyframes veil { 0% { opacity: 0; } 12% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+  @keyframes welcome-card { 0% { transform: perspective(900px) rotateX(-70deg); opacity: 0; } 24% { transform: none; opacity: 1; } 72% { transform: none; opacity: 1; } 100% { transform: translateY(-16px); opacity: 0; } }
+  .check-draw { stroke-dasharray: 48; stroke-dashoffset: 48; animation: draw 0.6s 0.35s var(--ease-out-expo) forwards; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  /* Chart lines draw in once (pathLength = 1). */
+  .chart-line { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 0.9s var(--ease-out-expo) forwards; }
+  [data-effects='lite'] .chart-line { animation: none; stroke-dashoffset: 0; }
+  @media print { .chart-line { animation: none; stroke-dashoffset: 0; } }
+}
+
+@layer utilities {
+  .tabular {
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+  .paper-grain {
+    background-image: radial-gradient(color-mix(in oklab, var(--foreground) 6%, transparent) 1px, transparent 1px);
+    background-size: 4px 4px;
+  }
+  .rule-top {
+    border-top: 1px solid var(--border);
+  }
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .grad-deep .scrollbar-thin { scrollbar-color: rgba(255, 255, 255, 0.25) transparent; }
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, currentColor 22%, transparent) transparent;
+  }
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+}
+
+/* ---------------- 3D broadsheet (components/fx/Scene3D.tsx) ---------------- */
+.paper3d {
+  perspective: 1400px;
+  perspective-origin: 50% 30%;
+}
+.paper3d .rig {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: rotateX(calc(28deg + var(--py, 0) * -10deg)) rotateZ(-8deg) rotateY(calc(var(--px, 0) * 16deg));
+  transition: transform 0.7s var(--ease-out-expo);
+}
+.paper3d .bob {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  animation: bob 7s ease-in-out infinite;
+}
+.paper3d .stack {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+.paper3d .ply {
+  position: absolute;
+  inset: 0;
+  border-radius: 3px;
+  background: #ece5d6;
+  transform: translateZ(calc(var(--i) * -3px));
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+.paper3d .spread {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+.paper3d .leaf {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  border-radius: 3px;
+  background: #faf6ec;
+  overflow: hidden;
+}
+.paper3d .leaf.left { left: 0; }
+.paper3d .leaf.right { right: 0; }
+.paper3d .turn {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 50%;
+  transform-origin: 0 50%;
+  transform-style: preserve-3d;
+  animation: page-turn 4.8s cubic-bezier(0.65, 0, 0.35, 1) infinite alternate;
+}
+.paper3d .turn > .face {
+  position: absolute;
+  inset: 0;
+  border-radius: 3px;
+  backface-visibility: hidden;
+  background: #faf6ec;
+  overflow: hidden;
+}
+.paper3d .turn > .face.back { transform: rotateY(180deg); background: #f1ebde; }
+.paper3d .shadow {
+  position: absolute;
+  inset: 8% 4%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.45), transparent);
+  transform: translateZ(-40px);
+  filter: blur(6px);
+}
+@keyframes bob {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -10px, 14px); }
+}
+@keyframes page-turn {
+  0%, 18% { transform: translateZ(1px) rotateY(0deg); }
+  82%, 100% { transform: translateZ(1px) rotateY(-178deg); }
+}
+/* Printed content on the 3D pages (pure CSS shapes, no artwork). */
+.paper3d .col-lines {
+  background: repeating-linear-gradient(#bdb4a3 0 2px, transparent 2px 6px);
+}
+
+/* ---------------- 3D interaction layer ---------------- */
+/*
+ * Pointer tilt (app/tilt.ts writes --rx/--ry on the hovered [data-tilt] element only,
+ * once per animation frame). Combined with the press lift in one transform so they never fight.
+ */
+@media (hover: hover) and (pointer: fine) {
+  [data-tilt] {
+    transition: transform 0.45s var(--ease-out-expo), box-shadow 0.25s var(--ease-out-expo), border-color 0.2s;
+  }
+  [data-tilt]:hover {
+    transform: perspective(900px) translate3d(0, -3px, 0) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition-duration: 0.12s, 0.25s, 0.2s;
+  }
+  [data-tilt] .depth {
+    transition: transform 0.45s var(--ease-out-expo);
+  }
+  [data-tilt]:hover .depth {
+    transform: translateZ(18px);
+  }
+  [data-tilt]:hover {
+    transform-style: preserve-3d;
+  }
+  /* Glare follows the pointer (opacity + background-position only). */
+  [data-tilt]::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+    background: radial-gradient(260px circle at var(--gx, 50%) var(--gy, 50%), color-mix(in oklab, #fff 55%, transparent), transparent 60%);
+    mix-blend-mode: soft-light;
+  }
+  [data-tilt]:hover::after { opacity: 1; }
+}
+
+/* Cards unfold like a folded newspaper as they scroll into view: hinged on the top edge, the
+   sheet swings forward, flops a little past flat and settles, while the centre crease fades.
+   Scroll-driven, so it follows the reader's thumb; browsers without support simply show the card.
+   Fill is `backwards` only, so once open the card's own hover transforms apply untouched. */
+@supports (animation-timeline: view()) {
+  .reveal3d {
+    animation: reveal3d linear backwards;
+    animation-timeline: view();
+    animation-range: entry 0% entry 75%;
+  }
+  .reveal3d:not(.sticky, .fixed, .absolute) { position: relative; }
+  /* The fold crease: a shaded band across the middle and shade on the top half. */
+  .reveal3d::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    background:
+      linear-gradient(180deg, transparent 44%, color-mix(in oklab, var(--primary) 22%, transparent) 50%, transparent 56%),
+      linear-gradient(180deg, color-mix(in oklab, var(--primary) 12%, transparent), transparent 50%);
+    animation: crease linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 75%;
+  }
+  /* Pinned cards stay put. */
+  .reveal3d.sticky,
+  .reveal3d.fixed,
+  .reveal3d.sticky::before,
+  .reveal3d.fixed::before { animation: none; }
+  @keyframes reveal3d {
+    0% { opacity: 0; transform-origin: 50% 0; transform: perspective(1200px) translate3d(0, 60px, 0) rotateX(-62deg); }
+    55% { opacity: 1; transform-origin: 50% 0; transform: perspective(1200px) translate3d(0, 6px, 0) rotateX(7deg); }
+    100% { opacity: 1; transform-origin: 50% 0; transform: perspective(1200px) translate3d(0, 0, 0) rotateX(0deg); }
+  }
+  @keyframes crease {
+    0% { opacity: 1; }
+    60% { opacity: 0.55; }
+    100% { opacity: 0; }
+  }
+
+  /* Print run: a strip of fresh newsprint is unrolled under the header as the page is read.
+     The rolled paper at its edge turns as it travels. Hidden on pages too short to scroll
+     (the scroll timeline is inactive there, so the base styles apply). */
+  .press-run {
+    position: absolute;
+    inset-inline: 0;
+    top: 100%;
+    height: 3px;
+    margin-top: -2px;
+    pointer-events: none;
+    container-type: inline-size;
+  }
+  .press-run > i {
+    position: absolute;
+    inset: 0;
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    border-radius: 0 3px 3px 0;
+    background-color: var(--brand);
+    /* Column rules every 26px: the strip reads as a line of printed columns. */
+    background-image:
+      repeating-linear-gradient(90deg, transparent 0 24px, color-mix(in oklab, #fff 70%, transparent) 24px 26px),
+      var(--grad);
+    animation: press-fill linear both;
+    animation-timeline: scroll(root block);
+  }
+  .press-run > b {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    margin-top: -8px;
+    opacity: 0;
+    color: var(--brand);
+    filter: drop-shadow(0 2px 3px color-mix(in oklab, var(--primary) 30%, transparent));
+    animation: press-roll linear both;
+    animation-timeline: scroll(root block);
+  }
+  .press-run > b > svg { display: block; width: 100%; height: 100%; }
+  @keyframes press-fill {
+    to { transform: scaleX(1); }
+  }
+  @keyframes press-roll {
+    0% { opacity: 0; transform: translateX(0) rotate(0deg); }
+    4% { opacity: 1; }
+    96% { opacity: 1; }
+    100% { opacity: 0; transform: translateX(calc(100cqw - 16px)) rotate(1440deg); }
+  }
+  /* The front-page 3D paper tips back as the hero scrolls away. */
+  .scroll-tip {
+    animation: scroll-tip linear both;
+    animation-timeline: view();
+    animation-range: exit 0% exit 100%;
+  }
+  @keyframes scroll-tip {
+    to { opacity: 0.25; transform: perspective(900px) rotateX(38deg) translate3d(0, -20px, -80px); }
+  }
+}
+
+@supports not (animation-timeline: scroll()) {
+  .press-run { display: none; }
+}
+
+/* ---------------- React Bits adaptations ---------------- */
+@property --lamp { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
+
+/* Odometer figures (RollNumber, after React Bits "CountUp" roll mode): each digit rolls into place,
+   the right-hand digits first, like a press counter. */
+.roll { display: inline-flex; align-items: flex-start; }
+.roll-mark, .roll-col { display: inline-block; height: 1em; line-height: 1em; }
+.roll-col { overflow: hidden; }
+.roll-col > span {
+  display: flex;
+  flex-direction: column;
+  transform: translate3d(0, calc(var(--d, 0) * -1em), 0);
+  transition: transform 1.15s var(--ease-out-expo) calc(var(--k, 0) * 70ms + 160ms);
+}
+.roll-col > span > i { display: block; height: 1em; font-style: normal; }
+
+/* Fountain-pen cursor (cursor.ts): the pointer is an editor's pen nib in the palette's inks, outlined
+   in white with a shadow so it reads on any background; a bold ring wraps controls, the nib dips
+   over big clickable blocks, and an ink blot marks each click. */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html.ink-cursor:not(.ink-native),
+  html.ink-cursor:not(.ink-native) * { cursor: none !important; }
+}
+.cur-pen,
+.cur-ring,
+.cur-blot {
+  position: fixed;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  opacity: 0;
+  will-change: translate;
+}
+.cur-pen {
+  z-index: 10001;
+  width: 32px;
+  height: 32px;
+  margin: -5.4px 0 0 -5.4px;
+  transform-origin: 5.4px 5.4px;
+  transition: opacity 0.2s, scale 0.35s var(--ease-spring);
+}
+.cur-pen > svg {
+  display: block;
+  overflow: visible;
+  filter: drop-shadow(0 3px 4px rgb(0 0 0 / 0.35)) drop-shadow(0 0 1px rgb(0 0 0 / 0.5));
+  transition: transform 0.35s var(--ease-spring);
+  transform-origin: 5.4px 5.4px;
+}
+.cur-nib { fill: url(#cur-ink); stroke: #fff; stroke-width: 1.7px; stroke-linejoin: round; paint-order: stroke; }
+.cur-grip { fill: #1e1b2e; stroke: #fff; stroke-width: 1.5px; }
+.dark .cur-grip { fill: #0b0a12; }
+.cur-pen.is-on { opacity: 1; scale: 1.15; }
+.cur-pen[data-mode='native'] { opacity: 0; }
+/* Over a control the nib dips, ready to sign; pressing pushes it into the page. */
+.cur-pen[data-mode='wrap'] > svg,
+.cur-pen[data-mode='dip'] > svg { transform: rotate(14deg) scale(0.92); }
+.cur-pen.is-down > svg { transform: rotate(22deg) scale(0.8); transition-duration: 0.12s; }
+
+.cur-ring {
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 15px;
+  border: 2px solid var(--brand);
+  box-shadow: 0 0 0 2px color-mix(in oklab, #fff 85%, transparent), 0 8px 22px -8px color-mix(in oklab, var(--brand) 70%, transparent);
+  transition: opacity 0.25s, scale 0.3s var(--ease-spring), background-color 0.3s, border-color 0.3s;
+}
+.dark .cur-ring { border-color: color-mix(in oklab, var(--brand) 70%, #fff); box-shadow: 0 0 0 2px rgb(0 0 0 / 0.55), 0 8px 22px -8px color-mix(in oklab, var(--brand) 80%, transparent); }
+/* Free: the ring rests hidden on the tip, so a hover grows it out of the pen. */
+.cur-ring.is-on[data-mode='wrap'] { opacity: 1; }
+.cur-ring[data-mode='wrap'] { background-color: color-mix(in oklab, var(--brand) 9%, transparent); }
+.cur-ring.is-down { scale: 0.94; }
+
+/* Release: an ink blot spreads from the nib's tip and dries. */
+.cur-blot {
+  z-index: 9999;
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in oklab, var(--brand) 55%, transparent) 0 30%, transparent 32%), radial-gradient(circle, transparent 0 58%, color-mix(in oklab, var(--brand) 70%, transparent) 60% 66%, transparent 68%);
+}
+.cur-blot.is-on { animation: cur-blot 0.55s var(--ease-out-expo); }
+@keyframes cur-blot {
+  0% { opacity: 1; scale: 0.2; }
+  100% { opacity: 0; scale: 1.5; }
+}
+@media (prefers-reduced-motion: reduce) { .cur-pen, .cur-ring, .cur-blot { display: none; } }
+@media print { .cur-pen, .cur-ring, .cur-blot { display: none; } }
+
+/* Ink splash canvas (spark.ts, after React Bits "ClickSpark"). */
+.ink-spark { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 9999; pointer-events: none; }
+
+/* Delivered as you scroll (hooks/scrollReveal.ts marks each element once it enters the screen):
+   - .row-drop: list rows land like papers tossed onto a doorstep, alternately from the right and
+     the left, with a slight tilt that straightens as they settle.
+   - .press-line: card headlines are typeset left to right, an ink rule running under them.
+   Elements already on screen when they appear are shown as they are (no flash while searching). */
+html[data-reveal] .row-drop:not([data-in]) {
+  opacity: 0;
+  transform: translate3d(var(--drop-x, 36px), -12px, 0) rotate(var(--drop-r, -0.6deg));
+}
+html[data-reveal] .row-drop:nth-child(even) { --drop-x: -36px; --drop-r: 0.6deg; }
+html[data-reveal] li.row-drop { --drop-x: 44px; --drop-r: -2deg; }
+html[data-reveal] li.row-drop:nth-child(even) { --drop-x: -44px; --drop-r: 2deg; }
+html[data-reveal] .row-drop[data-in=''] {
+  transition:
+    opacity 0.5s var(--ease-out-expo) calc(var(--ri, 0) * 60ms),
+    transform 0.75s var(--ease-spring) calc(var(--ri, 0) * 60ms);
+}
+
+.press-line { position: relative; }
+html[data-reveal] .press-line:not([data-in]) { clip-path: inset(-12px 100% -12px -12px); }
+html[data-reveal] .press-line[data-in=''] {
+  clip-path: inset(-12px -12px -12px -12px);
+  transition: clip-path 0.85s var(--ease-out-expo) calc(var(--ri, 0) * 60ms + 80ms);
+}
+html[data-reveal] .press-line::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -5px;
+  height: 2px;
+  border-radius: 2px;
+  background-color: var(--brand);
+  background-image: var(--grad);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+html[data-reveal] .press-line[data-in='']::after {
+  animation: press-ink 1.3s var(--ease-out-expo) calc(var(--ri, 0) * 60ms + 80ms) both;
+}
+@keyframes press-ink {
+  0% { opacity: 1; transform: scaleX(0); }
+  55% { opacity: 1; transform: scaleX(1); }
+  100% { opacity: 0; transform: scaleX(1); }
+}
+
+/* Nav icons: a quick 3D spin on hover, a flip when a tab becomes active. */
+@media (hover: hover) {
+  .group:hover .spin3d { animation: spin-y 0.7s var(--ease-out-expo); }
+}
+.flip-on { animation: flip 0.6s var(--ease-out-expo); }
+
+/* Pause the 3D paper whenever it is off screen (components/fx/Scene3D.tsx). */
+.paper3d[data-paused] .bob,
+.paper3d[data-paused] .turn {
+  animation-play-state: paused;
+}
+
+/* Frosted blur on content blocks: desktop pointers with full effects only (phones keep the tint). */
+@media (hover: hover) and (pointer: fine) {
+  :root[data-effects='full'] .glass-card {
+    backdrop-filter: blur(14px) saturate(1.35);
+    -webkit-backdrop-filter: blur(14px) saturate(1.35);
+  }
+}
+
+/* ---------------- Theme switch (View Transitions page wipe) ---------------- */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-new(root) { z-index: 9999; }
+
+/* ---------------- Leaflet ---------------- */
+.leaflet-container {
+  font-family: var(--font-sans);
+  border-radius: var(--radius);
+  background: var(--muted);
+}
+.leaflet-div-icon.stop-pin {
+  background: transparent;
+  border: none;
+}
+.leaflet-tile-pane {
+  filter: sepia(0.18) saturate(0.85);
+}
+.dark .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.88) saturate(0.5) sepia(0.15);
+}
+.dark .leaflet-popup-content-wrapper,
+.dark .leaflet-popup-tip {
+  background: var(--popover);
+  color: var(--popover-foreground);
+}
+.dark .leaflet-bar a {
+  background: var(--card);
+  color: var(--foreground);
+  border-color: var(--border);
+}
+
+/* ---------------- Ambient life ----------------
+ * Always running (browsers pause them in hidden tabs; reduced motion and the lite effects level switch them off).
+ * Small elements, transform and opacity only. Each rule animates a new element or the inner icon,
+ * never an element that already has an animation. */
+
+/* Stat tiles: a soft light reads across each figure in turn, the icon nods. */
+.idle-sheen {
+  display: block;
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 40%;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent, color-mix(in oklab, var(--brand) 16%, transparent), transparent);
+  transform: translate3d(-130%, 0, 0) skewX(-18deg);
+  will-change: transform;
+  animation: idle-sheen 7s var(--ease-out-expo) infinite;
+  animation-delay: calc(var(--i, 0) * 0.8s + 0.3s);
+}
+@keyframes idle-sheen {
+  0% { transform: translate3d(-130%, 0, 0) skewX(-18deg); }
+  38%, 100% { transform: translate3d(340%, 0, 0) skewX(-18deg); }
+}
+.idle-icon {
+  animation: idle-nod 3.4s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * -0.5s);
+}
+@keyframes idle-nod {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: translate3d(0, -2px, 0) rotate(-7deg); }
+}
+
+/* Page kicker dot pings like a "live" press light; the logo's dot breathes. */
+.idle-dot { position: relative; }
+.idle-dot::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 9999px;
+  background: var(--brand);
+  opacity: 0;
+  animation: idle-ping 2.6s ease-out infinite;
+}
+@keyframes idle-ping {
+  0% { transform: scale(0.6); opacity: 0.6; }
+  80%, 100% { transform: scale(2.8); opacity: 0; }
+}
+.idle-live { animation: idle-live 2.4s ease-in-out infinite; }
+@keyframes idle-live { 50% { opacity: 0.25; transform: scale(0.7); } }
+
+/* Unread notifications: the bell gives a short ring every few seconds. */
+.idle-ring {
+  transform-origin: 50% 2px;
+  animation: idle-ring 5s ease-in-out infinite;
+}
+@keyframes idle-ring {
+  0%, 9%, 100% { transform: rotate(0deg); }
+  1.5% { transform: rotate(15deg); }
+  3% { transform: rotate(-13deg); }
+  4.5% { transform: rotate(9deg); }
+  6% { transform: rotate(-6deg); }
+  7.5% { transform: rotate(3deg); }
+}
+
+/* The paper boy: rides along under the header and tosses a paper behind him. */
+.idle-courier {
+  display: block;
+  overflow: hidden;
+  container-type: inline-size;
+  mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+  animation: fade-in 0.8s ease both;
+}
+.idle-courier::before {
+  content: '';
+  position: absolute;
+  inset: auto 0 1px 0;
+  height: 1px;
+  background: repeating-linear-gradient(90deg, currentColor 0 8px, transparent 8px 18px);
+  opacity: 0.35;
+}
+.idle-courier-ride {
+  position: absolute;
+  bottom: 1px;
+  left: 0;
+  will-change: transform;
+  animation: idle-ride 20s linear infinite;
+}
+@keyframes idle-ride {
+  from { transform: translate3d(-60px, 0, 0); }
+  to { transform: translate3d(calc(100cqw + 20px), 0, 0); }
+}
+.idle-courier-ride svg { animation: lane-bob 0.7s ease-in-out infinite; }
+.idle-wheel {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: idle-spin 0.9s linear infinite;
+}
+@keyframes idle-spin { to { transform: rotate(360deg); } }
+.idle-paper {
+  position: absolute;
+  left: 8px;
+  bottom: 12px;
+  width: 9px;
+  height: 6px;
+  border-radius: 1px;
+  background: var(--grad);
+  opacity: 0;
+  animation: idle-toss 4.4s ease-out infinite;
+}
+@keyframes idle-toss {
+  0%, 60% { opacity: 0; transform: translate3d(0, 0, 0) rotate(0deg); }
+  62% { opacity: 1; transform: translate3d(0, 0, 0) rotate(0deg); }
+  75% { opacity: 1; transform: translate3d(-20px, -9px, 0) rotate(-200deg); }
+  88% { opacity: 0.9; transform: translate3d(-38px, 10px, 0) rotate(-350deg); }
+  100% { opacity: 0; transform: translate3d(-38px, 10px, 0) rotate(-350deg); }
+}
+
+/* Lite effects keep only the tiny cues; reduced motion keeps none. */
+[data-effects='lite'] .idle-courier,
+[data-effects='lite'] .idle-sheen { display: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  .idle-courier, .idle-sheen { display: none !important; }
+  .idle-icon, .idle-live, .idle-ring, .idle-dot::after { animation: none !important; }
+}
+
+/* ---------------- Effects level ---------------- */
+[data-effects='lite'] .paper3d .bob,
+[data-effects='lite'] .paper3d .turn,
+[data-effects='lite'] .ticker-track,
+[data-effects='lite'] .animate-float,
+[data-effects='lite'] .animate-spin-slow {
+  animation: none !important;
+}
+[data-effects='lite'] .newsprint { display: none; }
+[data-effects='lite'] .reveal3d,
+[data-effects='lite'] .reveal3d::before,
+[data-effects='lite'] .press-run > *,
+[data-effects='lite'] .scroll-tip,
+[data-effects='lite'] .flip-on,
+[data-effects='lite'] .spin3d,
+[data-effects='lite'] .animate-card3d,
+[data-effects='lite'] .animate-flip,
+[data-effects='lite'] .animate-drop3d {
+  animation: none !important;
+}
+[data-effects='lite'] .animate-unfold { animation-name: fade-in !important; }
+[data-effects='lite'] [data-tilt]:hover { transform: translate3d(0, -3px, 0); }
+[data-effects='lite'] .ambient > i,
+[data-effects='lite'] .ambient > b,
+[data-effects='lite'] .grad-deep::before { animation: none !important; }
+[data-effects='lite'] .ambient > s,
+[data-effects='lite'] .ambient > u { display: none; }
+[data-effects='lite'] .glass,
+[data-effects='lite'] .glass-pop { backdrop-filter: none; -webkit-backdrop-filter: none; }
+[data-effects='lite'] .glass { background: var(--background); }
+[data-effects='lite'] .glass-pop { background-color: var(--popover); }
+[data-effects='lite'] [data-tilt]::after { display: none; }
+[data-effects='lite'] .ticker-track { flex-wrap: wrap; width: auto; }
+[data-effects='lite'] .ticker-track > [aria-hidden] { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  .welcome-veil { display: none; }
+  .reveal3d, .reveal3d::before, .scroll-tip { animation: none !important; }
+  .press-run { display: none; }
+  .live-dots, .pulse-ring, .float-card, .lane-truck, .lane-pedal, .sheen-bar, .flow-beam::after, .flow-down::after, .cta-bob, .cta-ring, .cta-phone { animation: none !important; }
+  .lane-truck, .lane-paper { display: none; }
+  .lane-house { animation: none !important; opacity: 0.8; }
+  .flow-beam::after, .flow-down::after, .nav-pulse, .logo-shine::after { display: none; }
+  .nav-in { animation: none !important; }
+  .cta-ring { display: none; }
+  .live-dots, .pulse-ring { display: none; }
+  .ambient > s, .ambient > u { display: none; }
+  .pin-caret { animation: none !important; }
+  [data-tilt]:hover { transform: none !important; }
+  .ticker-track { flex-wrap: wrap; width: auto; }
+  .ticker-track > [aria-hidden] { display: none; }
+}
+
+@media print {
+  html, body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .newsprint, .ambient, .no-print {
+    display: none !important;
+  }
+  .print-area {
+    box-shadow: none !important;
+    border: none !important;
+  }
+  .hero-panel {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+/* Phone: 16px fields stop iOS from zooming the page on focus (scoped to the Create Account page). Unlayered so it beats the utility classes. */
+@media (max-width: 639px) {
+  .fit-16 :is(input:not([type="checkbox"], [type="radio"]), textarea, select, button[role="combobox"]) { font-size: 16px; }
+}
+/* Phone one-screen forms: slightly shorter fields so a whole part fits without scrolling. */
+@media (max-width: 639px) {
+  .slim :is(input:not([type="checkbox"], [type="radio"]), button[role="combobox"]) { height: 2.5rem; }
+}
+/* Phone one-screen OTP / MPIN: slimmer keypad keys. */
+@media (max-width: 639px) {
+  .keypad-slim button { height: 2.75rem; }
+}
+
+/* ================= Forms: tile fields, numbered sections, progress footer =================
+   Unlayered so these beat the utility classes the controls carry (h-11, border-input, ring). */
+
+/* Field tile: label inside the box, value under it; the whole tile is the target. */
+.fld {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 3.75rem;
+  border: 1px solid var(--input);
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: inset 1px 2px 4px var(--soft-lo), inset -1px -1px 3px var(--soft-hi);
+  cursor: text;
+  transition: border-color 0.2s, box-shadow 0.3s var(--ease-out-expo), background-color 0.2s;
+}
+/* Ink bar on the left edge: drawn in while the tile has focus. */
+.fld::before {
+  content: '';
+  position: absolute;
+  left: -1px;
+  top: 12px;
+  bottom: 12px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--grad);
+  transform: scaleY(0);
+  transition: transform 0.35s var(--ease-out-expo);
+}
+.fld:hover { border-color: color-mix(in oklab, var(--masthead) 40%, var(--input)); }
+.fld:focus-within {
+  border-color: color-mix(in oklab, var(--brand) 60%, var(--input));
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--ring) 14%, transparent), 0 8px 20px -12px color-mix(in oklab, var(--brand) 45%, transparent);
+}
+.fld:focus-within::before { transform: scaleY(1); }
+.fld[data-state='error'] {
+  border-color: var(--destructive);
+  background: color-mix(in oklab, var(--destructive) 4%, var(--card));
+}
+.fld[data-state='error']:focus-within { box-shadow: 0 0 0 4px color-mix(in oklab, var(--destructive) 16%, transparent); }
+.fld[data-state='error']::before { background: var(--destructive); transform: scaleY(1); }
+/* Locked (disabled / calculated) fields: dashed, flat, no caret. */
+.fld:has(.fld-body :disabled):not(:has(.fld-body :enabled)) {
+  border-style: dashed;
+  background: color-mix(in oklab, var(--muted) 60%, transparent);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.fld-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 24px;
+  padding: 8px 12px 0;
+}
+.fld-head > :not(.fld-label) { margin-top: 1px; }
+.fld-label {
+  min-width: 0;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  color: var(--muted-foreground);
+  cursor: inherit;
+  transition: color 0.2s;
+}
+.fld:focus-within .fld-label { color: var(--masthead); }
+.fld[data-state='error'] .fld-label { color: var(--destructive); }
+.fld-tag {
+  flex-shrink: 0;
+  border-radius: 999px;
+  padding: 1px 7px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--masthead);
+  background: color-mix(in oklab, var(--brand) 10%, transparent);
+}
+.fld-ok {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--success);
+  animation: fld-pop 0.4s var(--ease-spring) both;
+}
+@keyframes fld-pop { from { transform: scale(0.3); opacity: 0; } }
+
+/* The control inside a tile: no box of its own. */
+.fld-body { display: flex; flex-direction: column; flex: 1; }
+.fld-body .field-grad {
+  height: 2.375rem;
+  padding-bottom: 4px;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+.fld-body .field-grad:focus-visible { border-color: transparent; background: transparent; }
+.fld-body textarea.field-grad { height: auto; min-height: 4.5rem; padding-top: 4px; padding-bottom: 10px; resize: vertical; }
+.fld:not([data-labelled]) .fld-body .field-grad { height: 2.75rem; padding-bottom: 0; }
+.fld:not([data-labelled]) { min-height: 0; }
+/* The label already names the field: its placeholder only shows while typing. */
+.fld[data-labelled] .fld-body .field-grad:not(:focus)::placeholder { color: transparent; }
+/* Anything that is not a plain field (toggles, a map, a logo picker) gets breathing room. */
+.fld-body:not(:has(.field-grad)) { justify-content: center; padding: 4px 12px 9px; cursor: default; }
+
+.fld-msg {
+  display: flex;
+  gap: 6px;
+  padding-inline: 4px;
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: var(--muted-foreground);
+}
+.fld-msg.is-error { font-weight: 550; color: var(--destructive); animation: fld-in 0.3s var(--ease-out-expo); }
+@keyframes fld-in { from { opacity: 0; transform: translateY(-3px); } }
+
+/* "Go to field": a short pulse so the eye finds it. */
+.fld-flash { animation: fld-flash 0.9s var(--ease-out-expo); }
+@keyframes fld-flash {
+  0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--brand) 45%, transparent); }
+  100% { box-shadow: 0 0 0 12px transparent; }
+}
+
+/* Numbered sections joined by a column rule. */
+.form-sec {
+  position: relative;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 14px;
+  padding-bottom: 22px;
+}
+.form-sec-wrap { container-type: inline-size; }
+.form-sec-wrap:last-child .form-sec { padding-bottom: 4px; }
+.form-sec-wrap:not(:last-child) .form-sec::before {
+  content: '';
+  position: absolute;
+  left: 13.5px;
+  top: 34px;
+  bottom: 6px;
+  width: 1px;
+  background: repeating-linear-gradient(to bottom, var(--border) 0 4px, transparent 4px 8px);
+}
+.form-sec-num {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--masthead);
+  background: color-mix(in oklab, var(--brand) 10%, var(--card));
+  border: 1px solid color-mix(in oklab, var(--brand) 30%, transparent);
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+.form-sec[data-done] .form-sec-num { color: #fff; background: var(--success); border-color: var(--success); }
+.form-sec[data-error] .form-sec-num { color: #fff; background: var(--destructive); border-color: var(--destructive); }
+.form-sec-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 28px;
+  margin-bottom: 12px;
+  padding-top: 4px;
+}
+.form-sec-count {
+  flex-shrink: 0;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 11.5px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-foreground);
+  background: var(--muted);
+}
+.form-sec-count.is-done { color: var(--success); background: color-mix(in oklab, var(--success) 12%, transparent); }
+/* Narrow forms (phones, side columns): the number moves into the heading and the rule goes. */
+@container (max-width: 40rem) {
+  .form-sec { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .form-sec-num { position: absolute; left: 0; top: 0; width: 24px; height: 24px; font-size: 12px; }
+  .form-sec-wrap .form-sec::before { display: none; }
+  .form-sec-head { padding-left: 34px; padding-top: 2px; }
+}
+
+/* Footer: progress on the left, buttons on the right; sticks to the bottom of the screen on long forms. */
+.form-actions {
+  position: sticky;
+  bottom: calc(var(--bottom-bar, 0px) + env(safe-area-inset-bottom, 0px));
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border-top: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+  border-radius: 0 0 1rem 1rem;
+  background: var(--glass-strong);
+  backdrop-filter: blur(16px) saturate(1.5);
+  -webkit-backdrop-filter: blur(16px) saturate(1.5);
+}
+.form-progress { display: flex; align-items: center; gap: 10px; min-width: 0; }
+@media (max-width: 767px) { .form-actions { padding: 10px 14px; } }
+.fp-dial {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  color: #fff;
+  background:
+    radial-gradient(closest-side, var(--card) 72%, transparent 74%),
+    conic-gradient(var(--brand) calc(var(--p) * 360deg), var(--muted) 0);
+}
+.fp-dial.is-done { background: var(--success); animation: fld-pop 0.45s var(--ease-spring); }
+.fp-next {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  max-width: 100%;
+  min-width: 0;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--masthead);
+  text-underline-offset: 3px;
+}
+.fp-next:hover { text-decoration: underline; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fld, .fld::before, .fld-ok, .fld-msg.is-error, .fld-flash, .fp-dial { transition: none; animation: none; }
+}
+/* Phones: the dock covers the bottom of the screen, so sticky form footers sit above it. */
+@media (max-width: 767px) {
+  :root { --bottom-bar: 92px; }
+}
+
+/* ================= Records workspace: card grid, add tile, form drawer ================= */
+.rec-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+  gap: 14px;
+  padding: 16px;
+}
+.rec-card {
+  position: relative;
+  height: 100%;
+  padding: 14px 16px 14px;
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
+  background: color-mix(in oklab, var(--card) 82%, transparent);
+  box-shadow: inset 0 1px 0 var(--glass-hi), 0 10px 24px -18px var(--soft-lo);
+  transition: transform 0.3s var(--ease-out-expo), box-shadow 0.3s var(--ease-out-expo), border-color 0.25s;
+}
+/* A thin ink line on top: the card's "masthead". */
+.rec-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 18px auto;
+  height: 2px;
+  border-radius: 0 0 2px 2px;
+  background: var(--grad);
+  opacity: 0.55;
+  transition: opacity 0.25s, inset 0.35s var(--ease-out-expo);
+}
+@media (hover: hover) {
+  .rec-card:hover {
+    transform: translate3d(0, -3px, 0);
+    border-color: color-mix(in oklab, var(--brand) 35%, var(--glass-border));
+    box-shadow: inset 0 1px 0 var(--glass-hi), 0 18px 32px -18px color-mix(in oklab, var(--brand) 40%, transparent);
+  }
+  .rec-card:hover::before { opacity: 1; inset: 0 10px auto; }
+}
+.rec-avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--grad);
+  box-shadow: inset 0 1px 1px rgb(255 255 255 / 0.4), inset 0 -2px 4px rgb(0 0 0 / 0.18);
+}
+.rec-add {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 9rem;
+  border: 1.5px dashed color-mix(in oklab, var(--brand) 35%, var(--border));
+  border-radius: 18px;
+  font-size: 13.5px;
+  font-weight: 650;
+  color: var(--masthead);
+  background: color-mix(in oklab, var(--brand) 4%, transparent);
+  transition: background-color 0.25s, border-color 0.25s, transform 0.3s var(--ease-out-expo);
+}
+.rec-add:hover { background: color-mix(in oklab, var(--brand) 9%, transparent); border-color: var(--brand); }
+.rec-add:active { transform: scale(0.98); }
+.rec-add-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--grad);
+  box-shadow: 0 8px 18px -8px var(--glow);
+  transition: transform 0.35s var(--ease-spring);
+}
+.rec-add:hover .rec-add-icon { transform: rotate(90deg); }
+.rec-add-icon svg { width: 20px; height: 20px; }
+
+/* Cards / table switch. */
+.view-switch {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 12px;
+  background: var(--muted);
+}
+.view-switch button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 30px;
+  border-radius: 9px;
+  color: var(--muted-foreground);
+  transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.view-switch button svg { width: 16px; height: 16px; }
+.view-switch button:hover { color: var(--foreground); }
+.view-switch button[aria-checked='true'] { color: var(--masthead); background: var(--card); box-shadow: 0 1px 3px var(--soft-lo); }
+@media (max-width: 767px) { .view-switch { display: none; } }
+
+/* Form drawer. */
+.form-drawer { max-width: 100vw; }
+.form-drawer-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 20px 16px;
+  border-bottom: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+  background: linear-gradient(180deg, color-mix(in oklab, var(--brand) 8%, transparent), transparent);
+}
+@media (min-width: 640px) { .form-drawer-head { padding: 26px 28px 18px; } }
+.form-actions.in-drawer {
+  position: static;
+  border-radius: 0;
+  padding: 14px 20px calc(14px + env(safe-area-inset-bottom, 0px));
+}
+@media (min-width: 640px) { .form-actions.in-drawer { padding-inline: 28px; } }
+
+/* Short settings form kept on the page: a strip above the list. */
+.form-strip > * { max-width: 56rem; }
+
+/* ================= Report / search pages: filter rail + results ================= */
+.query-desk {
+  display: grid;
+  gap: 18px;
+  align-items: start;
+}
+@media (min-width: 1280px) {
+  .query-desk { grid-template-columns: 17.5rem minmax(0, 1fr); gap: 22px; }
+}
+.query-rail {
+  border: 1px solid var(--glass-border);
+  border-radius: 22px;
+  background: var(--glass);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+@media (min-width: 1280px) {
+  .query-rail { position: sticky; top: 6.5rem; max-height: calc(100dvh - 8rem); overflow-y: auto; }
+  .query-rail-head { pointer-events: none; }
+  .query-rail-head::after { display: none; }
+}
+.query-rail-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px;
+  list-style: none;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--primary);
+  background: linear-gradient(180deg, color-mix(in oklab, var(--brand) 9%, transparent), transparent);
+  border-bottom: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
+}
+.query-rail-head::-webkit-details-marker { display: none; }
+.query-rail-head svg { color: var(--masthead); }
+.query-rail-head::after {
+  content: '';
+  margin-left: auto;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 0.3s var(--ease-out-expo);
+}
+.query-rail:not([open]) .query-rail-head { border-bottom-color: transparent; }
+.query-rail:not([open]) .query-rail-head::after { transform: rotate(-135deg); }
+.query-rail-body { padding: 14px; }
+/* Whatever grid the filters used, the rail stacks them in one column, buttons full width. */
+.query-rail-body form,
+.query-rail-body > div:not(.fld) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+  gap: 12px;
+}
+.query-rail-body form > *,
+.query-rail-body > div > * { grid-column: auto; max-width: none; width: auto; }
+.query-rail-body form > div:has(> button),
+.query-rail-body form > button { display: flex; flex-wrap: wrap; gap: 8px; }
+.query-rail-body form > div:has(> button) > button { flex: 1 1 auto; }
+@media (min-width: 640px) and (max-width: 1279px) {
+  .query-rail-body form,
+  .query-rail-body > div:not(.fld) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .query-rail-body form,
+  .query-rail-body > div:not(.fld) { grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: end; }
+}
+.query-summary {
+  margin: 0 4px 10px;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--primary);
+}
+/* The filter buttons stay at the foot of the rail while its fields scroll. */
+@media (min-width: 1280px) {
+  .query-rail-body form > div:last-child:has(> button) {
+    position: sticky;
+    bottom: -14px;
+    margin: 0 -14px -14px;
+    padding: 12px 14px 14px;
+    background: linear-gradient(to top, var(--glass-strong) 70%, transparent);
+    backdrop-filter: blur(8px);
+  }
+}
+
+/* ================= Manage Subscriptions: picker + customer profile, timeline ================= */
+.crm-head { overflow: hidden; }
+.crm-profile {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-top: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+  background: linear-gradient(90deg, color-mix(in oklab, var(--brand) 7%, transparent), transparent 70%);
+}
+.crm-profile .rec-avatar { width: 52px; height: 52px; border-radius: 18px; font-size: 17px; }
+.crm-facts {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: 10px 20px;
+}
+.crm-facts dt { font-size: 11px; font-weight: 650; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted-foreground); }
+.crm-facts dd { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 600; }
+@media (max-width: 767px) { .crm-profile { align-items: flex-start; padding: 14px 16px; } }
+
+.sub-timeline { position: relative; display: grid; gap: 12px; padding-left: 26px; }
+.sub-timeline::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 10px;
+  bottom: 10px;
+  width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(var(--brand), color-mix(in oklab, var(--brand-2) 50%, transparent));
+  opacity: 0.45;
+}
+.sub-stop { position: relative; }
+.sub-dot {
+  position: absolute;
+  left: -24px;
+  top: 18px;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: var(--card);
+  border: 3px solid var(--brand);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--brand) 14%, transparent);
+}
+
+/* ================= Figures: bento tiles ================= */
+.grid:has(> .stat-cell) { gap: 12px; }
+.stat-cell {
+  --edge: color-mix(in oklab, var(--tone) 38%, var(--glass-border));
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  min-height: 9.25rem;
+  padding: 16px 16px 15px;
+  overflow: hidden;
+  text-align: left;
+  border-radius: 22px;
+  /* Corner glow in the tone over the card surface: gradients only, nothing blurred. */
+  background:
+    radial-gradient(130% 90% at 100% 0%, color-mix(in oklab, var(--tone) 16%, transparent), transparent 58%),
+    linear-gradient(180deg, color-mix(in oklab, var(--card) 92%, transparent), color-mix(in oklab, var(--card) 78%, transparent));
+  border: 1px solid var(--edge);
+  box-shadow: inset 0 1px 0 var(--glass-hi), 0 14px 28px -22px color-mix(in oklab, var(--tone) 70%, transparent);
+  animation: stat-in 0.6s var(--ease-out-expo) backwards;
+  animation-delay: calc(var(--i, 0) * 60ms);
+  transition: transform 0.35s var(--ease-out-expo), box-shadow 0.35s var(--ease-out-expo), border-color 0.25s;
+}
+@keyframes stat-in { from { opacity: 0; transform: translate3d(0, 12px, 0) scale(0.98); } }
+/* Big faint icon in the corner: the tile's watermark. */
+.stat-mark {
+  position: absolute;
+  right: -14px;
+  bottom: -16px;
+  z-index: -1;
+  width: 92px;
+  height: 92px;
+  color: var(--tone);
+  opacity: 0.07;
+  stroke-width: 1.5;
+  transition: transform 0.5s var(--ease-out-expo), opacity 0.3s;
+}
+.stat-top { display: flex; align-items: flex-start; gap: 10px; min-width: 0; }
+.stat-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 11px;
+  color: #fff;
+  background: linear-gradient(140deg, color-mix(in oklab, var(--tone) 80%, #fff), var(--tone));
+  box-shadow: inset 0 1px 1px rgb(255 255 255 / 0.35), 0 6px 14px -6px var(--tone);
+}
+.stat-icon svg { width: 16px; height: 16px; }
+.stat-label {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  flex: 1;
+  min-width: 0;
+  padding-top: 1px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--muted-foreground);
+}
+.stat-go {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  color: var(--tone);
+  background: color-mix(in oklab, var(--tone) 12%, transparent);
+  transition: transform 0.35s var(--ease-spring), background-color 0.25s, color 0.25s;
+}
+.stat-go svg { width: 15px; height: 15px; }
+.stat-value {
+  margin-top: auto;
+  overflow: hidden;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: 38px;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  /* Solid ink with a touch of the tone (gradient text would hide the rolling digits, which move on their own layers). */
+  color: color-mix(in oklab, var(--primary) 82%, var(--tone));
+}
+.stat-hint {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  overflow: hidden;
+  padding: 4px 10px 4px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: color-mix(in oklab, var(--tone) 65%, var(--foreground));
+  background: color-mix(in oklab, var(--tone) 12%, transparent);
+}
+.stat-hint::before { content: ''; flex-shrink: 0; width: 6px; height: 6px; border-radius: 999px; background: var(--tone); }
+.stat-cell.is-link { cursor: pointer; }
+.stat-cell.is-link:focus-visible { outline: 2px solid var(--tone); outline-offset: 3px; }
+@media (hover: hover) {
+  .stat-cell.is-link:hover {
+    transform: translate3d(0, -4px, 0);
+    border-color: color-mix(in oklab, var(--tone) 60%, transparent);
+    box-shadow: inset 0 1px 0 var(--glass-hi), 0 22px 36px -22px color-mix(in oklab, var(--tone) 85%, transparent);
+  }
+  .stat-cell.is-link:hover .stat-go { color: #fff; background: var(--tone); transform: rotate(45deg); }
+  .stat-cell:hover .stat-mark { opacity: 0.12; transform: rotate(-8deg) scale(1.06); }
+}
+.stat-cell.is-link:active { transform: scale(0.98); }
+
+/* Hero tile: the first of six or more figures leads the bento, filled with the brand ink. */
+.grid:has(> .stat-cell:nth-child(6)) > .stat-cell:first-child {
+  grid-column: span 2;
+  border-color: transparent;
+  background:
+    radial-gradient(120% 120% at 100% 0%, rgb(255 255 255 / 0.22), transparent 55%),
+    var(--grad);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.3), 0 22px 40px -24px var(--glow);
+}
+.grid:has(> .stat-cell:nth-child(6)) > .stat-cell:first-child .stat-label { color: rgb(255 255 255 / 0.88); font-size: 14px; }
+.grid:has(> .stat-cell:nth-child(6)) > .stat-cell:first-child .stat-icon { color: var(--masthead-light, var(--brand)); background: #fff; box-shadow: 0 6px 14px -6px rgb(0 0 0 / 0.35); }
+.grid:has(> .stat-cell:nth-child(6)) > .stat-cell:first-child .stat-value { color: #fff; font-size: 48px; }
+.grid:has(> .stat-cell:nth-child(6)) > .stat-cell:first-child .stat-hint { color: #fff; background: rgb(255 255 255 / 0.18); }
+.grid:has(> .stat-cell:nth-child(6)) > .stat-cell:first-child .stat-hint::before { background: #fff; }
+.grid:has(> .stat-cell:nth-child(6)) > .stat-cell:first-child .stat-go { color: var(--masthead-light, var(--brand)); background: #fff; }
+.grid:has(> .stat-cell:nth-child(6)) > .stat-cell:first-child .stat-mark { color: #fff; opacity: 0.16; width: 150px; height: 150px; right: -20px; bottom: -28px; }
+@media (min-width: 1024px) {
+  /* Three columns: the hero is 2 x 2 and the other five fill the rest exactly. */
+  .grid.lg\:grid-cols-3:has(> .stat-cell:nth-child(6)) > .stat-cell:first-child { grid-row: span 2; }
+  .grid.lg\:grid-cols-3:has(> .stat-cell:nth-child(6)) > .stat-cell:first-child .stat-value { font-size: 64px; }
+}
+/* Two columns: the hero spans the row; an even count leaves one tile alone, so the last one stretches. */
+@media (max-width: 1023px) {
+  .grid:has(> .stat-cell:nth-child(6)):has(> .stat-cell:nth-child(even):last-child) > .stat-cell:last-child { grid-column: span 2; }
+}
+@media (max-width: 767px) {
+  .grid:has(> .stat-cell) { gap: 10px; }
+  .stat-cell { min-height: 8.25rem; gap: 12px; padding: 13px 13px 12px; border-radius: 20px; }
+  .stat-icon { width: 28px; height: 28px; border-radius: 10px; }
+  .stat-icon svg { width: 14px; height: 14px; }
+  .stat-label { font-size: 12px; -webkit-line-clamp: 3; }
+  .stat-value { font-size: 30px; }
+  .stat-go { position: absolute; top: 10px; right: 10px; width: 22px; height: 22px; }
+  .stat-go svg { width: 13px; height: 13px; }
+  .stat-cell.is-link .stat-top { padding-right: 18px; }
+  .stat-top { flex-direction: column; gap: 8px; }
+  .stat-label { padding-top: 0; }
+  .stat-hint { font-size: 11px; padding: 3px 8px 3px 7px; }
+  .stat-mark { width: 72px; height: 72px; }
+  .grid:has(> .stat-cell:nth-child(6)) > .stat-cell:first-child .stat-value { font-size: 42px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stat-cell { animation: none; transition: none; }
+  .stat-mark, .stat-go { transition: none; }
+}
+
+/* ================= Desktop menu: floating glass rail ================= */
+.nav-rail {
+  position: relative;
+  border: 1px solid var(--glass-border);
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--brand) 6%, transparent), transparent 70%),
+    var(--glass-strong);
+  backdrop-filter: blur(18px) saturate(1.5);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  box-shadow: inset 0 1px 0 var(--glass-hi), 0 14px 34px -22px var(--glow);
+}
+.rail-list {
+  display: flex;
+  gap: 2px;
+  padding: 6px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  /* Faded edges hint that the rail scrolls when it is wider than the screen. */
+  mask-image: linear-gradient(to right, transparent, #000 14px, #000 calc(100% - 14px), transparent);
+}
+.rail-list::-webkit-scrollbar { display: none; }
+.rail-list > li { flex: 1 0 auto; }
+.rail-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  min-width: 84px;
+  padding: 8px 12px 9px;
+  border-radius: 16px;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+  transition: background-color 0.25s, color 0.25s;
+}
+.rail-item:hover,
+.rail-item[data-state='open'] { color: var(--foreground); background: color-mix(in oklab, var(--brand) 8%, transparent); }
+.rail-item:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }
+.rail-chip {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 30px;
+  border-radius: 11px;
+  color: var(--masthead);
+  background: color-mix(in oklab, var(--brand) 10%, transparent);
+  transition: background 0.3s, color 0.3s, transform 0.35s var(--ease-spring), box-shadow 0.3s;
+}
+.rail-item:hover .rail-chip { transform: translateY(-2px); }
+.rail-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.005em;
+}
+.rail-caret { width: 12px; height: 12px; opacity: 0.6; transition: transform 0.3s var(--ease-out-expo); }
+.rail-item[data-state='open'] .rail-caret { transform: rotate(180deg); }
+.rail-badge {
+  position: absolute;
+  top: -5px;
+  right: -7px;
+  display: grid;
+  place-items: center;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--destructive);
+  box-shadow: 0 0 0 2px var(--card);
+}
+/* Open page: gradient chip, strong label, ink bar underneath. */
+.rail-item[aria-current='page'],
+.rail-item[data-on='true'] { color: var(--primary); }
+.rail-item[aria-current='page'] .rail-label,
+.rail-item[data-on='true'] .rail-label { font-weight: 700; }
+.rail-item[aria-current='page'] .rail-chip,
+.rail-item[data-on='true'] .rail-chip {
+  color: #fff;
+  background: var(--grad);
+  box-shadow: inset 0 1px 1px rgb(255 255 255 / 0.35), 0 8px 16px -8px var(--glow);
+}
+.rail-ink {
+  position: absolute;
+  left: 28%;
+  right: 28%;
+  bottom: 1px;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--grad);
+}
+@media (max-width: 1100px) {
+  .rail-item { min-width: 76px; padding-inline: 8px; }
+  .rail-label { font-size: 12px; }
+}
+
+/* ================= Newspaper motion, round two =================
+   Every effect is one-shot or compositor-only (transform / opacity), and all of it switches off
+   under prefers-reduced-motion and the "lite" effects setting. */
+
+/* Loading: lines of type being set while an ink roller passes over them. The roller is a
+   pseudo-element moved with transform, so loading no longer repaints every frame. */
+.type-skel {
+  position: relative;
+  overflow: hidden;
+  border-radius: 6px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 46px, color-mix(in oklab, var(--card) 70%, transparent) 46px 52px),
+    var(--muted);
+}
+.type-skel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 45%;
+  background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--brand) 14%, var(--accent)) 45%, color-mix(in oklab, var(--foreground) 10%, transparent) 55%, transparent);
+  transform: translate3d(-110%, 0, 0);
+  animation: roller 1.35s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+  will-change: transform;
+}
+@keyframes roller { to { transform: translate3d(260%, 0, 0); } }
+
+/* Route change: the new page turns in from its spine, like the next page of the paper. */
+.page-in { animation: page-in 0.5s var(--ease-out-expo) backwards; transform-origin: 0 30%; }
+@keyframes page-in {
+  from { opacity: 0; transform: perspective(1600px) rotateY(-9deg) translate3d(-14px, 0, 0); }
+  60% { opacity: 1; }
+}
+
+/* Empty states: a rolled paper is tossed in, lands with a bounce, then idles. */
+.paper-toss {
+  animation: paper-toss 0.9s var(--ease-out-expo) backwards, float 6s ease-in-out 0.9s infinite;
+}
+@keyframes paper-toss {
+  0% { opacity: 0; transform: translate3d(-90px, -70px, 0) rotate(-200deg) scale(0.6); }
+  55% { opacity: 1; transform: translate3d(0, 6px, 0) rotate(8deg) scale(1.04); }
+  75% { transform: translate3d(0, -4px, 0) rotate(-3deg); }
+  100% { transform: none; }
+}
+
+/* Record cards: the top corner folds down like a dog-eared page on hover. */
+@media (hover: hover) {
+  .rec-card::after {
+    content: '';
+    position: absolute;
+    top: -1px;
+    right: -1px;
+    width: 22px;
+    height: 22px;
+    border-radius: 0 18px 0 6px;
+    background: linear-gradient(225deg, var(--background, var(--muted)) 50%, color-mix(in oklab, var(--brand) 22%, var(--card)) 50%);
+    box-shadow: -2px 2px 5px -2px var(--soft-lo);
+    transform: scale(0);
+    transform-origin: 100% 0;
+    transition: transform 0.35s var(--ease-spring);
+    pointer-events: none;
+  }
+  .rec-card:hover::after { transform: scale(1); }
+}
+
+/* Toasts: a slip fed out of the press, with a torn perforated top, a single ink sweep, and the
+   icon pressed on like a rubber stamp. */
+[data-sonner-toast] { overflow: hidden; }
+[data-sonner-toast]::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 5px;
+  background: radial-gradient(circle at 5px -1px, transparent 3px, color-mix(in oklab, var(--brand) 55%, transparent) 3.5px) 0 0 / 10px 5px repeat-x;
+  opacity: 0.55;
+  pointer-events: none;
+}
+[data-sonner-toast]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 30%, color-mix(in oklab, var(--brand) 16%, transparent) 50%, transparent 70%);
+  transform: translate3d(-100%, 0, 0);
+  animation: toast-ink 0.9s 0.15s var(--ease-out-expo) forwards;
+  pointer-events: none;
+}
+@keyframes toast-ink { to { transform: translate3d(100%, 0, 0); } }
+[data-sonner-toast] [data-icon] { animation: stamp 0.5s 0.2s var(--ease-spring) backwards; }
+@keyframes stamp {
+  0% { opacity: 0; transform: scale(2.2) rotate(-18deg); }
+  60% { opacity: 1; transform: scale(0.9) rotate(4deg); }
+  100% { transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .type-skel::after, .page-in, .paper-toss, [data-sonner-toast]::after, [data-sonner-toast] [data-icon] { animation: none !important; }
+  .rec-card::after { transition: none; }
+}
+[data-effects='lite'] .type-skel::after,
+[data-effects='lite'] [data-sonner-toast]::after { animation: none; display: none; }
+[data-effects='lite'] .page-in { animation-name: fade-in; }
+[data-effects='lite'] .paper-toss { animation: none; }
+/* Form drawer: an ink rule is drawn under the heading as the sheet comes in. */
+.form-drawer-head { position: relative; }
+.form-drawer-head::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--grad);
+  transform-origin: 0 50%;
+  animation: rule-draw 0.7s 0.15s var(--ease-out-expo) both;
+}
+@keyframes rule-draw { from { transform: scaleX(0); } }
+@media (prefers-reduced-motion: reduce) { .form-drawer-head::after { animation: none; } }
+
+/* ================= Truncate panel ================= */
+.tr-account {
+  padding: 16px 18px;
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
+  background: linear-gradient(120deg, color-mix(in oklab, var(--brand) 7%, transparent), transparent 60%), color-mix(in oklab, var(--card) 70%, transparent);
+  animation: tr-in 0.5s var(--ease-out-expo) backwards;
+}
+.tr-panel {
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
+  background: color-mix(in oklab, var(--card) 75%, transparent);
+}
+.tr-head {
+  padding: 12px 16px;
+  font-family: var(--font-display);
+  font-size: 14.5px;
+  font-weight: 650;
+  color: var(--primary);
+  border-bottom: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+  background: color-mix(in oklab, var(--muted) 55%, transparent);
+}
+.tr-list { display: grid; gap: 4px; padding: 8px; }
+.tr-list > li { animation: tr-in 0.45s var(--ease-out-expo) backwards; animation-delay: calc(var(--i, 0) * 32ms + 120ms); }
+@keyframes tr-in { from { opacity: 0; transform: translate3d(0, 8px, 0); } }
+
+.tr-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  isolation: isolate;
+  transition: color 0.2s;
+}
+/* Picked rows: a tint sweeps in from the left. */
+.tr-row::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: color-mix(in oklab, var(--destructive) 9%, transparent);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 0.4s var(--ease-out-expo);
+}
+.tr-row:hover::before { transform: scaleX(1); background: color-mix(in oklab, var(--brand) 6%, transparent); }
+.tr-row.is-on::before { transform: scaleX(1); background: color-mix(in oklab, var(--destructive) 9%, transparent); }
+.tr-row:has(:focus-visible) { outline: 2px solid var(--ring); outline-offset: -2px; }
+.tr-box {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border: 1.6px solid color-mix(in oklab, var(--muted-foreground) 55%, transparent);
+  border-radius: 6px;
+  color: #fff;
+  background: var(--card);
+  transition: background-color 0.25s, border-color 0.25s, transform 0.3s var(--ease-spring);
+}
+.tr-box svg { width: 13px; height: 13px; stroke-dasharray: 24; stroke-dashoffset: 24; transition: stroke-dashoffset 0.35s 0.05s var(--ease-out-expo); }
+.tr-row.is-on .tr-box { border-color: var(--destructive); background: var(--destructive); transform: scale(1.06); }
+.tr-row.is-on .tr-box svg { stroke-dashoffset: 0; }
+.tr-name { display: block; font-size: 14px; font-weight: 600; line-height: 1.25; }
+.tr-row.is-all .tr-name { font-weight: 700; }
+.tr-note { display: block; margin-top: 2px; font-size: 11.5px; line-height: 1.3; color: var(--muted-foreground); }
+.tr-count {
+  flex-shrink: 0;
+  min-width: 30px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted-foreground);
+  background: var(--muted);
+  transition: color 0.25s, background-color 0.25s;
+}
+.tr-row.is-on .tr-count { color: var(--destructive); background: color-mix(in oklab, var(--destructive) 14%, transparent); }
+/* Taken along with its main table: dashed box and a short pulse when it joins. */
+.tr-row.is-forced { cursor: default; }
+.tr-row.is-forced .tr-box { border-style: dashed; background: color-mix(in oklab, var(--destructive) 70%, transparent); animation: tr-join 0.5s var(--ease-spring); }
+@keyframes tr-join { 40% { transform: scale(1.3); } }
+.tr-row.is-locked { cursor: not-allowed; }
+.tr-row.is-locked .tr-name { color: var(--muted-foreground); }
+.tr-row.is-locked .tr-box { border-style: dashed; color: var(--muted-foreground); background: var(--muted); }
+.tr-row.is-locked:hover::before { transform: scaleX(0); }
+
+/* Sub-table groups light up when their main table is picked. */
+.tr-group { display: grid; gap: 2px; padding: 6px 4px 4px; border-radius: 14px; transition: background-color 0.3s; }
+.tr-group + .tr-group { border-top: 1px dashed color-mix(in oklab, var(--border) 80%, transparent); }
+.tr-group-name { padding: 2px 8px 4px; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted-foreground); transition: color 0.3s; }
+.tr-group.is-live { background: color-mix(in oklab, var(--destructive) 4%, transparent); }
+.tr-group.is-live .tr-group-name { color: var(--destructive); }
+.tr-row.is-sub { padding-left: 14px; }
+
+/* Erase: picked rows go through the shredder. */
+.tr-row.is-shred {
+  -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 7px, transparent 7px 9px);
+  mask-image: repeating-linear-gradient(90deg, #000 0 7px, transparent 7px 9px);
+  animation: tr-shred 0.6s cubic-bezier(0.55, 0, 0.75, 0.2) forwards;
+}
+@keyframes tr-shred {
+  0% { transform: none; opacity: 1; }
+  30% { transform: translate3d(0, -2px, 0); }
+  100% { transform: translate3d(0, 26px, 0) scaleY(1.6); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tr-account, .tr-list > li, .tr-row.is-forced .tr-box, .tr-row.is-shred { animation: none; }
+  .tr-row::before, .tr-box, .tr-box svg { transition: none; }
+}
+/* Account Details: view and edit swap with a short fold, the card glows while editing. */
+.tr-account { transition: border-color 0.3s, box-shadow 0.3s; }
+.tr-account.is-editing {
+  border-color: color-mix(in oklab, var(--brand) 45%, var(--glass-border));
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--brand) 10%, transparent);
+}
+.tr-swap { animation: tr-swap 0.45s var(--ease-out-expo) backwards; transform-origin: 50% 0; }
+@keyframes tr-swap { from { opacity: 0; transform: perspective(900px) rotateX(-12deg) translate3d(0, -6px, 0); } }
+@media (prefers-reduced-motion: reduce) { .tr-swap { animation: none; } }
+
+/* Active Accounts: every account action as one compact, colour-coded icon row. */
+.acct-actions { display: flex; align-items: center; gap: 4px; }
+.acct-act {
+  --c: var(--brand);
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  color: var(--c);
+  background: color-mix(in oklab, var(--c) 10%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--c) 24%, transparent);
+  transition: background-color 0.2s, color 0.2s, transform 0.25s var(--ease-spring), box-shadow 0.2s;
+}
+.acct-act svg { width: 16px; height: 16px; }
+.acct-act:hover { color: #fff; background: var(--c); transform: translateY(-2px); box-shadow: 0 8px 16px -8px var(--c); }
+.acct-act:active { transform: scale(0.94); }
+.acct-act:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; }
+.acct-act.is-hot { color: #fff; background: var(--c); }
+.acct-act.is-success { --c: var(--success); }
+.acct-act.is-warning { --c: var(--warning); }
+.acct-act.is-brand { --c: var(--brand); }
+.acct-act.is-info { --c: var(--info, #3b82f6); }
+.acct-act.is-danger { --c: var(--destructive); }
+/* Active Accounts table: tighter cells and wrapping headers so it fits without sideways scroll. */
+.acct-table th, .acct-table td { padding-left: 10px; padding-right: 10px; }
+.acct-table th { white-space: normal; line-height: 1.25; }
+.acct-table .acct-act { width: 31px; height: 31px; border-radius: 9px; }
+.acct-table .acct-act svg { width: 15px; height: 15px; }
+
+/* ================= Phones ================= */
+@media (max-width: 767px) {
+  /* Report filters two-up so the results start sooner; buttons span the row. */
+  .query-rail-body { padding: 12px; }
+  .query-rail-body form,
+  .query-rail-body > div:not(.fld) { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .query-rail-body form > div:has(> button),
+  .query-rail-body form > button { grid-column: 1 / -1; }
+  .query-rail-head { padding: 12px 14px; }
+}
+/* Phone cards with many actions: one evenly spaced row under the details. */
+.card-actions .acct-actions { justify-content: space-between; gap: 8px; }
+.card-actions .acct-act { flex: 1; width: auto; height: 38px; }
+
+/* Phone drawers: progress on its own line, the buttons share the full width below it. */
+@media (max-width: 767px) {
+  .form-actions.in-drawer { flex-wrap: wrap; gap: 10px; padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); }
+  .form-actions.in-drawer > .form-progress { flex: 1 0 100%; }
+  .form-actions.in-drawer > .form-progress.hidden { display: none; }
+  .form-actions.in-drawer > div:last-child { flex: 1 0 100%; margin-left: 0; }
+  .form-actions.in-drawer > div:last-child > button { flex: 1; }
+  .form-actions.in-drawer > button { flex: 1; }
+  .form-drawer-head { padding: 18px 16px 14px; }
+}
+@media (max-width: 767px) {
+  .form-actions.in-drawer > div:first-child { flex: 1 0 100%; margin-right: 0; }
+}
+/* Installed app (PWA) on notched phones: keep the header, drawers and sign-in clear of the
+   status bar and the home indicator. env() is 0 everywhere else, so nothing moves on desktop. */
+.app-head { box-sizing: content-box; padding-top: env(safe-area-inset-top, 0px); }
+.form-drawer { padding-top: env(safe-area-inset-top, 0px); }
+.auth-root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+/* Phone card action rows hold plain buttons too (Accept / Reject): they share the width. */
+.card-actions > div:not(.acct-actions) { display: flex; flex-wrap: wrap; gap: 8px; }
+.card-actions > div:not(.acct-actions) > button { flex: 1; }
