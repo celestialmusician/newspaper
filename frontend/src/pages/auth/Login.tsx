@@ -362,7 +362,7 @@ export default function Login() {
             <div>
               <BackLink onClick={() => go('identify')} />
               <StepHeader icon={KeyRound} title={`Hello, ${name.split(' ')[0]}`} text={`Enter your 4-digit MPIN for ${ROLE_LABEL[role as Role]} · +91 ${mobile}`} />
-              <PinInput length={4} value={code} onChange={setCode} onComplete={loginMpin} masked autoFocus invalid={!!error} label="MPIN" />
+              <PinInput keypad length={4} value={code} onChange={setCode} onComplete={loginMpin} masked autoFocus invalid={!!error} label="MPIN" />
               {error && <p className="mt-4 text-center text-[13.5px] font-medium text-destructive">{error}</p>}
               {keypad(4, loginMpin)}
               <Button size="xl" className="mt-6 w-full [@media(max-height:760px)]:mt-3 [@media(max-height:760px)]:h-12" loading={busy} disabled={code.length !== 4} onClick={() => void loginMpin()}>
@@ -384,7 +384,7 @@ export default function Login() {
                   Autofill
                 </button>
               </DemoNote>
-              <PinInput length={6} value={code} onChange={setCode} onComplete={verify} autoFocus invalid={!!error} label="One-time password" />
+              <PinInput keypad length={6} value={code} onChange={setCode} onComplete={verify} autoFocus invalid={!!error} label="One-time password" />
               {error && <p className="mt-4 text-center text-[13.5px] font-medium text-destructive">{error}</p>}
               {keypad(6, verify)}
               <Button size="xl" className="mt-6 w-full [@media(max-height:760px)]:mt-3 [@media(max-height:760px)]:h-12" loading={busy} disabled={code.length !== 6} onClick={() => void verify()}>
@@ -405,7 +405,7 @@ export default function Login() {
           {step === 'create' && (
             <div>
               <StepHeader icon={ShieldCheck} title="Create your MPIN" text="Choose 4 digits you will remember. You'll use this MPIN every time you sign in." />
-              <PinInput length={4} value={code} onChange={setCode} onComplete={(v) => { setMpin(v); go('confirm') }} masked autoFocus invalid={!!error} label="New MPIN" />
+              <PinInput keypad length={4} value={code} onChange={setCode} onComplete={(v) => { setMpin(v); go('confirm') }} masked autoFocus invalid={!!error} label="New MPIN" />
               {error && <p className="mt-4 text-center text-[13.5px] font-medium text-destructive">{error}</p>}
               {keypad(4, (v) => { setMpin(v); go('confirm') })}
               <Button size="xl" className="mt-6 w-full [@media(max-height:760px)]:mt-3 [@media(max-height:760px)]:h-12" disabled={code.length !== 4} onClick={() => { setMpin(code); go('confirm') }}>
@@ -418,7 +418,7 @@ export default function Login() {
             <div>
               <BackLink onClick={() => go('create')} />
               <StepHeader icon={Smartphone} title="Confirm MPIN" text="Enter the same 4 digits again." />
-              <PinInput length={4} value={code} onChange={setCode} onComplete={confirmMpin} masked autoFocus invalid={!!error} label="Confirm MPIN" />
+              <PinInput keypad length={4} value={code} onChange={setCode} onComplete={confirmMpin} masked autoFocus invalid={!!error} label="Confirm MPIN" />
               {error && <p className="mt-4 text-center text-[13.5px] font-medium text-destructive">{error}</p>}
               {keypad(4, confirmMpin)}
               <Button size="xl" className="mt-6 w-full [@media(max-height:760px)]:mt-3 [@media(max-height:760px)]:h-12" loading={busy} disabled={code.length !== 4} onClick={() => void confirmMpin()}>

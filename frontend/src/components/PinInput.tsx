@@ -2,7 +2,21 @@ import { Delete } from 'lucide-react'
 import * as React from 'react'
 import { cn } from '@/lib/utils'
 
-/** Segmented numeric code input (OTP / MPIN). Opens the numeric keypad on phones. */
+/** Width below which the on-screen keypad is shown (same breakpoint as the `sm:hidden` on the keypad). */
+const KEYPAD_QUERY = '(max-width: 639px)'
+const subscribeKeypad = (cb: () => void) => {
+  const mq = window.matchMedia(KEYPAD_QUERY)
+  mq.addEventListener('change', cb)
+  return () => mq.removeEventListener('change', cb)
+}
+const keypadShown = () => window.matchMedia(KEYPAD_QUERY).matches
+
+/**
+ * Segmented numeric code input (OTP / MPIN). With `keypad` the page shows its own on-screen
+ * keypad on phones, so the system keyboard is kept shut there (`inputMode="none"`): the field
+ * keeps focus for the caret and for a hardware keyboard, but a tap no longer pushes the keypad
+ * off the screen. Without `keypad` (or on wider screens) it opens the numeric keyboard.
+ */
 export function PinInput({
   length,
   value,
@@ -12,6 +26,7 @@ export function PinInput({
   autoFocus,
   invalid,
   label,
+  keypad,
 }: {
   length: number
   value: string
@@ -21,8 +36,10 @@ export function PinInput({
   autoFocus?: boolean
   invalid?: boolean
   label: string
+  keypad?: boolean
 }) {
   const ref = React.useRef<HTMLInputElement>(null)
+  const ownKeypad = React.useSyncExternalStore(subscribeKeypad, keypadShown, () => false)
   React.useEffect(() => {
     if (autoFocus) ref.current?.focus()
   }, [autoFocus])
@@ -38,7 +55,7 @@ export function PinInput({
         aria-label={label}
         value={value}
         onChange={(e) => set(e.target.value)}
-        inputMode="numeric"
+        inputMode={keypad && ownKeypad ? 'none' : 'numeric'}
         autoComplete={masked ? 'off' : 'one-time-code'}
         pattern="\d*"
         maxLength={length}

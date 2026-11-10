@@ -224,7 +224,7 @@ export default function Register() {
                 Autofill
               </button>
             </DemoNote>
-            <PinInput length={6} value={code} onChange={setCode} onComplete={verify} autoFocus invalid={!!error} label="OTP" />
+            <PinInput keypad length={6} value={code} onChange={setCode} onComplete={verify} autoFocus invalid={!!error} label="OTP" />
             {error && <p className="mt-3 text-center text-[13.5px] font-medium text-destructive">{error}</p>}
             {keypad(6, verify)}
             <Button size="xl" className="mt-4 w-full max-sm:h-12 [@media(max-height:760px)]:mt-3 [@media(max-height:760px)]:h-12" loading={busy} disabled={code.length !== 6} onClick={() => void verify()}>
@@ -240,7 +240,7 @@ export default function Register() {
           <div data-auth-step="mpin">
             <Progress stage={stage} />
             <StepHeader icon={ShieldCheck} title="Create a 4-digit MPIN" text="You'll use this to sign in from now on." />
-            <PinInput length={4} value={code} onChange={setCode} onComplete={(v) => { setMpin(v); go('confirm') }} masked autoFocus invalid={!!error} label="MPIN" />
+            <PinInput keypad length={4} value={code} onChange={setCode} onComplete={(v) => { setMpin(v); go('confirm') }} masked autoFocus invalid={!!error} label="MPIN" />
             {error && <p className="mt-3 text-center text-[13.5px] font-medium text-destructive">{error}</p>}
             {keypad(4, (v) => { setMpin(v); go('confirm') })}
             <Button size="xl" className="mt-4 w-full max-sm:h-12 [@media(max-height:760px)]:mt-3 [@media(max-height:760px)]:h-12" disabled={code.length !== 4} onClick={() => { setMpin(code); go('confirm') }}>
@@ -254,7 +254,7 @@ export default function Register() {
             <Progress stage={stage} />
             <BackLink onClick={() => go('mpin')} />
             <StepHeader icon={KeyRound} title="Confirm MPIN" text="Enter the same 4 digits again." />
-            <PinInput length={4} value={code} onChange={setCode} onComplete={finish} masked autoFocus invalid={!!error} label="Confirm MPIN" />
+            <PinInput keypad length={4} value={code} onChange={setCode} onComplete={finish} masked autoFocus invalid={!!error} label="Confirm MPIN" />
             {error && <p className="mt-3 text-center text-[13.5px] font-medium text-destructive">{error}</p>}
             {keypad(4, finish)}
             <Button size="xl" className="mt-4 w-full max-sm:h-12 [@media(max-height:760px)]:mt-3 [@media(max-height:760px)]:h-12" loading={busy} disabled={code.length !== 4} onClick={() => void finish()}>
