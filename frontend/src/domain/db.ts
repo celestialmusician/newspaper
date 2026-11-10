@@ -78,4 +78,4 @@ export interface DB {
   publicCounts?: { subscribers: number; routes: number; publications: number }
 }
 
-export const DB_VERSION = 7
+export const DB_VERSION = 8

@@ -125,11 +125,11 @@ class ApiFlowTests(TestCase):
         self.assertEqual(r.status_code, 400)
         r = admin.patch(f'/api/executives/{ex.id}/', {'alt_mobile': ex.user.mobile}, format='json')
         self.assertEqual(r.status_code, 400)
-        r = admin.patch(f'/api/executives/{ex.id}/', {'alt_mobile': '9447100001', 'alt_mobile_relation': 'Spouse'}, format='json')
+        r = admin.patch(f'/api/executives/{ex.id}/', {'alt_mobile': '7777700001', 'alt_mobile_relation': 'Spouse'}, format='json')
         self.assertEqual(r.status_code, 200, r.content)
         snap = admin.get('/api/sync/snapshot/?only=executives').json()['executives']
         mine = next(e for e in snap if e['id'] == f'exe_{ex.id}')
-        self.assertEqual((mine['altMobile'], mine['altMobileRelation']), ('9447100001', 'Spouse'))
+        self.assertEqual((mine['altMobile'], mine['altMobileRelation']), ('7777700001', 'Spouse'))
         # A subscriber sees their executive's name and number, never the family contact.
         cust = self.login('customer', self.user('cus_1').mobile)
         for e in cust.get('/api/sync/snapshot/?only=executives').json()['executives']:

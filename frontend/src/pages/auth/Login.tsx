@@ -306,7 +306,7 @@ export default function Login() {
                       onChange={(e) => setMobile(e.target.value.replace(/\D/g, '').slice(0, 10))}
                       inputMode="numeric"
                       autoComplete="tel-national"
-                      placeholder="98470 12345"
+                      placeholder="99999 99999"
                       className="h-12 pl-13 text-lg tracking-wide"
                       aria-invalid={!!error && !!role}
                     />

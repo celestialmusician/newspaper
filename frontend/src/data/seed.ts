@@ -116,7 +116,7 @@ export function buildSeed(): DB {
     id: `agt_${i + 1}`,
     code: `AG-${String(i + 1).padStart(2, '0')}`,
     name,
-    mobile: `94470${String(21001 + i * 137).padStart(5, '0')}`,
+    mobile: `99999${String((i % 9) + 1).repeat(5)}`, // dummy: 9999911111, 9999922222, ...
     email: `${name.split(' ')[0]!.toLowerCase()}@morningtalk.in`,
     agencyName,
     areaIds,
@@ -140,13 +140,13 @@ export function buildSeed(): DB {
     id: `exe_${i + 1}`,
     code: `DE-${String(i + 1).padStart(2, '0')}`,
     name,
-    mobile: `85470${String(31002 + i * 211).padStart(5, '0')}`,
+    mobile: `88888${String((i % 9) + 1).repeat(5)}`, // dummy: 8888811111, 8888822222, ...
     agentId: agents[ai]!.id,
     areaIds,
     joiningDate: i === 3 ? addDaysISO(today, -24) : `2024-0${(i % 9) + 1}-0${(i % 8) + 1}`,
     status: 'active',
     canCollectCash: i !== 6,
-    altMobile: `94471${String(52004 + i * 317).padStart(5, '0')}`,
+    altMobile: `77777${String((i % 9) + 1).repeat(5)}`,
     altMobileRelation: (['Father', 'Spouse', 'Brother', 'Mother', 'Spouse', 'Sister', 'Father'] as const)[i % 7],
   }))
 
@@ -260,11 +260,14 @@ export function buildSeed(): DB {
   const customers: Customer[] = []
   const subscriptions: Subscription[] = []
   const subStart = monthsFrom(billingStart, -4)
+  // Dummy numbers that look obviously fake: 6666600001, 6666600002, ... (alternates: 6666700001, ...).
+  // The two draws below are kept so the rest of the seeded random data stays exactly as it was.
   const usedMobiles = new Set<string>()
-  const mobile = () => {
-    let m: string
-    do m = `${pick(['9', '8', '7'])}${Math.floor(100000000 + r() * 899999999)}`
-    while (usedMobiles.has(m))
+  const mobileSeq = [0, 0]
+  const mobile = (alt = false) => {
+    pick(['9', '8', '7'])
+    r()
+    const m = `${alt ? '66667' : '66666'}${String(++mobileSeq[alt ? 1 : 0]!).padStart(5, '0')}`
     usedMobiles.add(m)
     return m
   }
@@ -281,7 +284,7 @@ export function buildSeed(): DB {
       name,
       mobile: m,
       whatsapp: m,
-      altMobile: r() > 0.6 ? mobile() : undefined,
+      altMobile: r() > 0.6 ? mobile(true) : undefined,
       email: r() > 0.4 ? `${name.toLowerCase().replace(/[^a-z]+/g, '.')}@gmail.com` : undefined,
       gender,
       dob: r() > 0.5 ? `19${60 + Math.floor(r() * 39)}-0${1 + Math.floor(r() * 9)}-1${Math.floor(r() * 9)}` : undefined,
@@ -394,7 +397,7 @@ export function buildSeed(): DB {
     locked: false,
     renewalRequested: i === 3,
     lastLoginAt: lastSeenHours[i] == null ? undefined : new Date(Date.now() - lastSeenHours[i]! * 3600e3).toISOString(),
-    lastIp: lastSeenHours[i] == null ? undefined : i % 2 ? '2405:201:f00b:e801:1b2:ba6f:26bb:6fe2' : '2401:4900:8fdc:cc37:b045:c642:f8b4:ba70',
+    lastIp: lastSeenHours[i] == null ? undefined : i % 2 ? '2001:db8::1' : '2001:db8::2',
   }))
   // Agencies register straight into an account now (no manual approval), so there are no pending requests.
   const accountRequests: AccountRequest[] = []
@@ -403,8 +406,8 @@ export function buildSeed(): DB {
     { id: 'bcs_2', accountIds: [agents[3]!.id, agents[4]!.id], startDate: addDaysISO(today, -1), expiryDate: addDaysISO(today, 14), message: 'Your licence is due for renewal. Please renew to keep your account active.', kind: 'alert', createdAt: new Date(Date.now() - 24 * 3600e3).toISOString(), createdBy: ADMIN },
   ]
   const resellers: Reseller[] = [
-    { id: 'rsl_1', accountNo: 'RS-001', name: 'Joseph Mathew', mobile: '9446055501', email: 'joseph@keralamedia.in', address: 'Kerala Media Partners, Statue Road, Thiruvananthapuram', status: 'active' },
-    { id: 'rsl_2', accountNo: 'RS-002', name: 'Lakshmi Menon', mobile: '9567012230', email: 'lakshmi.distributors@gmail.com', address: 'Lakshmi Distributors, MG Road, Kochi', status: 'active' },
+    { id: 'rsl_1', accountNo: 'RS-001', name: 'Joseph Mathew', mobile: '9111111111', email: 'joseph@keralamedia.in', address: 'Kerala Media Partners, Statue Road, Thiruvananthapuram', status: 'active' },
+    { id: 'rsl_2', accountNo: 'RS-002', name: 'Lakshmi Menon', mobile: '9222222222', email: 'lakshmi.distributors@gmail.com', address: 'Lakshmi Distributors, MG Road, Kochi', status: 'active' },
   ]
 
   const db: DB = {
@@ -414,7 +417,7 @@ export function buildSeed(): DB {
       agencyName: 'Morning Talk News Agency',
       agencyAddress: 'TC 25/1430, Statue Road, Thiruvananthapuram, Kerala 695001',
       gstin: '32ABCDE1234F1Z5',
-      supportPhone: '9847012345',
+      supportPhone: '9999900000',
       invoicePrefix: 'MTN',
       receiptPrefix: 'RCP',
       billingDueDays: 10,
@@ -424,7 +427,7 @@ export function buildSeed(): DB {
       lowStockDefault: 3,
       overdueAfterDays: 10,
     },
-    admins: [{ id: ADMIN, name: 'Harikrishnan Nair', mobile: '9847012345', email: 'admin@morningtalk.in', status: 'active' }],
+    admins: [{ id: ADMIN, name: 'Harikrishnan Nair', mobile: '9999999999', email: 'admin@morningtalk.in', status: 'active' }],
     agents,
     executives,
     customers,

@@ -44,9 +44,9 @@ The first sign-in uses a **simulated OTP**. The code appears on screen with an A
 
 | Role | Name | Mobile |
 |---|---|---|
-| Super Administrator | Harikrishnan Nair | 9847012345 |
-| Distribution Agent | Rajesh Kumar | 9447021001 |
-| Delivery Executive | Akhil S | 8547031002 |
+| Super Administrator | Harikrishnan Nair | 9999999999 |
+| Distribution Agent | Rajesh Kumar | 9999911111 |
+| Delivery Executive | Akhil S | 8888811111 |
 | Customer | Arun Kumar | shown on the login screen |
 
 **Settings → Reset demo data** restores the original dataset and keeps your MPINs.

@@ -137,7 +137,7 @@ export function CustomerFormFields({ form, staff, showAgent, only }: { form: For
             <Input value={v.name} onChange={(e) => set('name', e.target.value)} placeholder="e.g. Sreelakshmi Nair" autoComplete="name" aria-invalid={!!errors.name} />
           </Field>
           <Field label="Mobile number" required error={errors.mobile} className={pair}>
-            <Input value={v.mobile} onChange={(e) => set('mobile', e.target.value.replace(/\D/g, '').slice(0, 10))} inputMode="numeric" placeholder="98470 12345" aria-invalid={!!errors.mobile} />
+            <Input value={v.mobile} onChange={(e) => set('mobile', e.target.value.replace(/\D/g, '').slice(0, 10))} inputMode="numeric" placeholder="99999 99999" aria-invalid={!!errors.mobile} />
           </Field>
           <Field label="Alternate mobile" error={errors.altMobile}>
             <Input value={v.altMobile} onChange={(e) => set('altMobile', e.target.value.replace(/\D/g, '').slice(0, 10))} inputMode="numeric" aria-invalid={!!errors.altMobile} />

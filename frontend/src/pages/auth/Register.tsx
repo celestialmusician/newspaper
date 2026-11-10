@@ -407,7 +407,7 @@ function AgencyRegistration({ onBack }: { onBack: () => void }) {
         <Field label="Mobile number" required htmlFor="agMobile" error={errors.mobile} className="col-span-2">
           <div className="relative">
             <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[15px] font-semibold text-muted-foreground">+91</span>
-            <Input id="agMobile" value={v.mobile} onChange={(e) => set('mobile', e.target.value.replace(/\D/g, '').slice(0, 10))} inputMode="numeric" autoComplete="tel-national" placeholder="98470 12345" className="pl-12 tracking-wide" aria-invalid={!!errors.mobile} />
+            <Input id="agMobile" value={v.mobile} onChange={(e) => set('mobile', e.target.value.replace(/\D/g, '').slice(0, 10))} inputMode="numeric" autoComplete="tel-national" placeholder="99999 99999" className="pl-12 tracking-wide" aria-invalid={!!errors.mobile} />
           </div>
         </Field>
         <Field label="Email" required htmlFor="agEmail" error={errors.email} className="col-span-2">
