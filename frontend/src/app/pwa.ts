@@ -31,12 +31,23 @@ export function initPWA() {
 
   if (import.meta.env.PROD && 'serviceWorker' in navigator) {
     void import('virtual:pwa-register').then(({ registerSW }) => {
+      // A new release is applied at once (the new service worker takes over and the page reloads), so an
+      // installed app or an old browser tab never keeps showing a stale version until someone taps "Update".
       const update = registerSW({
+        immediate: true,
         onNeedRefresh() {
-          toast('A new version of NewsRound is ready.', { duration: Infinity, action: { label: 'Update', onClick: () => void update(true) } })
+          toast('Updating NewsRound to the latest version…', { duration: 4000 })
+          void update(true)
         },
         onOfflineReady() {
           toast.success('Ready to work offline — your delivery list is available without signal.')
+        },
+        onRegisteredSW(_url, reg) {
+          if (!reg) return
+          // Look for a new release when the app is reopened or comes back to the front, and hourly while it stays open.
+          const check = () => void reg.update().catch(() => undefined)
+          document.addEventListener('visibilitychange', () => document.visibilityState === 'visible' && check())
+          window.setInterval(check, 60 * 60 * 1000)
         },
       })
     })
